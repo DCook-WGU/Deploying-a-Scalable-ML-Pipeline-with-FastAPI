@@ -1,0 +1,38 @@
+{
+  "name": "mlops-dev-project-two",
+  "build": {
+    "dockerfile": "../Dockerfile",
+    "context": "..",
+    "args": {
+      "ENV_NAME": "mlops-dev-project-two",
+      "ENV_FILE": "/app/environment.yml"
+    }
+  },
+  "workspaceFolder": "/app",
+  "runArgs": [
+    "--init",
+    "-v",
+    "${localWorkspaceFolder}:/app"
+  ],
+  "containerEnv": {
+    "PYTHONPATH": "/app:${PYTHONPATH}",
+    "WANDB_API_KEY": "${localEnv:WANDB_API_KEY}"
+  },
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": "/opt/miniconda/envs/mlops-dev-project-two/bin/python"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter",
+        "ms-vscode-remote.remote-containers"
+      ]
+    }
+  },
+
+  "postCreateCommand": "git config --global user.name 'DCook-WGU' && git config --global user.email 'dcoo230@wgu.edu'",
+  "remoteUser": "root"
+}

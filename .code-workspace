@@ -1,0 +1,18 @@
+// mlops.code-workspace
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "/opt/miniconda/envs/mlops/bin/python"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-toolsai.jupyter",
+      "ms-vscode.remote-containers"
+    ]
+  }
+}
