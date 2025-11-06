@@ -1,4 +1,7 @@
-_base: "configs/base.yaml"
+_base: "_base.yaml"
+
+io:                           
+  model_subdir: "gradient_boosting" 
 
 model:
   class_path: "sklearn.ensemble.GradientBoostingClassifier"

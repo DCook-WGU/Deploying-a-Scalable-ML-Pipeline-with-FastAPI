@@ -25,14 +25,15 @@ def load_config(config_path: str | Path):
     config_path = Path(config_path).resolve()
     cfg = _load_yaml(config_path)
 
-    base_path = cfg.get("base")
+    base_path = cfg.get("_base")
+
     if base_path:
         base_path = (config_path.parent / base_path).resolve()
 
         base = _load_yaml(base_path)
         merged = {**base, **cfg}  # top-level shallow merge
         
-        for section in ("train", "model"):
+        for section in ("io", "train", "model"):
             merged[section] = {**base.get(section, {}), **cfg.get(section, {})}
         return merged
 

@@ -1,0 +1,20 @@
+io:
+  data_file: "census.csv"           
+  model_dir: "model"                     
+  model_subdir: null                      
+  allow_overwrite: true                   
+  base_names:
+    model: "_model.pkl"
+    encoder: "_encoder.pkl"
+    label_binarizer: "_label_binarizer.pkl"
+
+train:
+  target: "salary"
+  test_size: 0.20
+  random_state: 42
+  min_threshold: 0.85 
+  scoring: accuracy
+  cv_folds: 5
+
+  # Optional hyperparam search
+  search: null

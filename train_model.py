@@ -47,7 +47,7 @@ def main():
     # Create empy Config
     cfg = {}
 
-    # Check config for arguments
+    # Load Config via arguments
     if args.config and args.config.strip():
         cfg = load_config(args.config)
         print(f"Configuration Found and Loaded: {cfg}")
@@ -55,18 +55,33 @@ def main():
         cfg = load_config("configs/random_forest.yaml")
         print(f"No configuration file was provided, using default - Random Forest Classifier")
 
+    print("CFG TYPE:", type(cfg))
+    print("CFG KEYS:", list(cfg.keys()))
+
 
     print(cfg)
 
+    print("Model Config Parameters")
     model_cfg = cfg.get("model", {})
     print(model_cfg)
 
+    print("Train Config Parameters")
     train_cfg = cfg.get("train", {})
     print(train_cfg)
 
-    model_name = get_model_name_from_cfg(cfg)
-    print(model_name)
+    print("IO Config Parameters")
+    io_cfg = cfg.get("io", {})
+    print(io_cfg)
 
+    #model_name = get_model_name_from_cfg(cfg)
+    model_name = cfg.get("model_subdir") or get_model_name_from_cfg(cfg)
+    print(f"Model Name: {model_name}")
+
+    model_subdirectory = io_cfg.get("model_subdir")
+    print(f"Model Subdirectory Name: {model_subdirectory}")
+
+    model_directory = io_cfg.get("model_dir")
+    print(f"Model Directory Name: {model_directory}")
 
 
     # TODO: load the cencus.csv data
@@ -75,15 +90,23 @@ def main():
     #data_path = os.path.join(project_path, "data", "census.csv")
 
     project_path = APP_ROOT
-    print(project_path)
+    print(f"Project Path: {project_path}")
 
-    data_path = os.path.join(DATA_DIR, "census.csv")
-    print(data_path)
+    data_path = DATA_DIR
+    print(f"Data Path: {data_path}")
+
+    data_filename = io_cfg.get("data_file")
+    print(f"Data FileName: {data_filename}")
+
+    data_file_path = os.path.join(data_path, data_filename)
+    print(f"Date File Path: {data_file_path}")
 
     #data = None # your code here
-    data = pd.read_csv(data_path)
+    data = pd.read_csv(data_file_path)
 
     data.head()
+    data.info()
+
 
     # TODO: split the provided data to have a train dataset and a test dataset
     # Optional enhancement, use K-fold cross validation instead of a train-test split.
@@ -121,26 +144,32 @@ def main():
     '''
     # TODO: use the train_model function to train the model on the training dataset
     model = None # your code here
+    #model = train_model(X_train, y_train, cfg=cfg)
 
     # save the model and the encoder
     #model_path = os.path.join(project_path, "model", "model.pkl")
     #save_model(model, model_path)
 
-    model_path = os.path.join(MODEL_DIR, f"{model_name}_model.pkl")
-    print(model_path)
+    #model_path = os.path.join(MODEL_DIR, cfg.get("model_subdir"), f"{model_name}_model.pkl")
+    #print(model_path)
 
 
 
     #encoder_path = os.path.join(project_path, "model", "encoder.pkl")
     #save_model(encoder, encoder_path)
 
-    encoder_path = os.path.join(MODEL_DIR, f"{model_name}_encoder.pkl")
-    print(encoder_path)
+    #encoder_path = os.path.join(MODEL_DIR, cfg.get("model_subdir"), f"{model_name}_encoder.pkl")
+    #print(encoder_path)
 
     # load the model
-    #model = load_model(
-        #model_path
-    #) 
+    if args.model and args.model.strip():
+        model_path = os.path.join(MODEL_DIR, model_name, )
+
+        print(f"Model provided, opening model")
+    else:
+        model_path = os.path.join(MODEL_DIR, "random_forest", "random_forest_model.pkl")
+
+    #model = load_model()
 
     # TODO: use the inference function to run the model inferences on the test dataset.
     preds = None # your code here

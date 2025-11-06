@@ -1,4 +1,7 @@
-_base: "configs/base.yaml"
+_base: "_base.yaml"
+
+io:                         
+  model_subdir: "gaussian_nb" 
 
 model:
   class_path: "sklearn.naive_bayes.GaussianNB"

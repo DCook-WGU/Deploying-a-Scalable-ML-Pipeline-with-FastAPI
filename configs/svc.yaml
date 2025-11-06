@@ -1,4 +1,7 @@
-_base: "configs/base.yaml"
+_base: "_base.yaml"
+
+io:                        
+  model_subdir: "svc" 
 
 model:
   class_path: "sklearn.svm.SVC"
