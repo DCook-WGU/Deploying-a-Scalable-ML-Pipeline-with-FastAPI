@@ -63,7 +63,14 @@ WORKDIR /app
 COPY . .
 
 # Ensure /app is always importable (common/*) and sitecustomize.py auto-loads
-ENV PYTHONPATH="/app:${PYTHONPATH}"
+# App paths + Python import root
+ENV APP_ROOT=/app \
+    DATA_DIR=/app/data \
+    MODEL_DIR=/app/model \
+    TMP_DIR=/tmp \
+    PYTHONPATH="/app:${PYTHONPATH}" \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
 
 # Enable conda activate in interactive shells
 RUN conda init bash
