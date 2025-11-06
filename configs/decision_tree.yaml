@@ -1,4 +1,4 @@
-_base: "_base.yaml"
+_base: "_base.yaml" # ../base.yaml change to this if i decided to subfolder each config file to it's own model subfolder
 
 io:               
   model_subdir: "decision_tree" 
