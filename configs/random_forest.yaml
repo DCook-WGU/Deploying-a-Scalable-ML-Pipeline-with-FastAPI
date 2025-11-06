@@ -1,0 +1,26 @@
+_base: "configs/base.yaml"
+
+model:
+  class_path: "sklearn.ensemble.RandomForestClassifier"
+  params:
+    # Essentials (defaults)
+    n_estimators: 100
+    criterion: "gini"
+    max_depth: null
+    min_samples_split: 2
+    min_samples_leaf: 1
+
+    # Helpful extras (defaults)
+    min_weight_fraction_leaf: 0.0
+    max_features: "sqrt"     # classifier default
+    max_leaf_nodes: null
+    min_impurity_decrease: 0.0
+    bootstrap: true
+    oob_score: false
+    # n_jobs: null
+    # random_state: null
+    verbose: 0
+    warm_start: false
+    class_weight: null
+    ccp_alpha: 0.0
+    max_samples: null

@@ -9,8 +9,7 @@ DATA_DIR = Path(os.getenv("DATA_DIR", APP_ROOT / "data")).resolve()
 
 TMP_DIR = Path(os.getenv("TMP_DIR", "/tmp")).resolve()
 
-
-#CONFIGS_DIR = Path(os.getenv("CONFIGS", APP_ROOT / "configs")).resolve()
+CONFIGS_DIR = Path(os.getenv("CONFIGS", APP_ROOT / "configs")).resolve()
 
 
 # Would be better to use Artifact for the name, but will keep it as model for the assignment

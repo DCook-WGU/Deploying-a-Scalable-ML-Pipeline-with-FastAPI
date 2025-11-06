@@ -1,0 +1,7 @@
+_base: "configs/base.yaml"
+
+model:
+  class_path: "sklearn.naive_bayes.GaussianNB"
+  params:
+    priors: null
+    var_smoothing: 1.0e-09

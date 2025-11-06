@@ -68,7 +68,7 @@ ENV APP_ROOT=/app \
     DATA_DIR=/app/data \
     MODEL_DIR=/app/model \
     TMP_DIR=/tmp \
-    PYTHONPATH="/app:${PYTHONPATH}" \
+    PYTHONPATH="/app:${PYTHONPATH:-}" \
     PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 
