@@ -3,11 +3,44 @@ from sklearn.metrics import fbeta_score, precision_score, recall_score
 from ml.data import process_data
 # TODO: add necessary import
 
+from sklearn.ensemble import RandomForestClassifier
+
+from typing import Dict, Any
+import importlib
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
+
+def _build_estimator(class_path: str, parameters: Dict[str, Any] = None, default_random_state: int = 42):
+
+    if class_path:
+        module_path, class_name = class_path.rsplit(".", 1)
+        module = importlib.import_module(module_path)
+        cls = getattr(module, class_name)
+    else:
+        cls = RandomForestClassifier
+
+    parameters = dict(parameters or {})
+
+    if "random_state" not in parameters:
+        try:
+            cls(random_state=default_random_state)
+            parameters["random_state"] = default_random_state
+        except TypeError:
+            Pass
+
+    return cls(**parameters)
+
 
 
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
+
+
+
+
+
+
 
 # Optional: implement hyperparameter tuning.
 def train_model(X_train, y_train):
@@ -27,6 +60,14 @@ def train_model(X_train, y_train):
     """
     # TODO: implement the function
     pass
+
+
+
+    #model = _build_estimator(class_path, parameters, default_random_state=random_state)
+
+
+
+
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
@@ -147,3 +188,7 @@ def performance_on_categorical_slice(
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
+
+
+
+
