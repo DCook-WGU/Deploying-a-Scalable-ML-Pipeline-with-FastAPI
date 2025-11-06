@@ -40,19 +40,21 @@ def load_config(config_path: str | Path):
 
 
 
-def get_model_name_from_cfg(cfg):
+def get_model_name_from_cfg(cfg: str):
     """Return a filesystem-safe model name derived from class_path in config."""
     
     model_cfg = cfg.get("model", {})
     class_path = model_cfg.get("class_path", "unknown_model")
     base = class_path.split(".")[-1]  # e.g. RandomForestClassifier
     
-    return camel_to_snake(base)
+    return clean_model_name(base)
 
-def camel_to_snake(name: str) -> str:
-    
-    # Inserts underscores only in between case changes
-    
-    s1 = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", name)
-    
-    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+def clean_model_name(name: str):
+
+    # Converst camel case to snake case and only adds an underscore between when case changes occurr
+    s1 = re.sub(r"(.)([A-Z][a-z]+)", r"\1_\2", name)
+    snake = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
+
+    # Removes classifier, regressor, model from the name
+    return re.sub(r"_(classifier|regressor|model)$", "", snake)

@@ -52,7 +52,7 @@ def main():
         cfg = load_config(args.config)
         print(f"Configuration Found and Loaded: {cfg}")
     else:
-        cfg = {}
+        cfg = load_config("configs/random_forest.yaml")
         print(f"No configuration file was provided, using default - Random Forest Classifier")
 
 
@@ -126,9 +126,16 @@ def main():
     #model_path = os.path.join(project_path, "model", "model.pkl")
     #save_model(model, model_path)
 
+    model_path = os.path.join(MODEL_DIR, f"{model_name}_model.pkl")
+    print(model_path)
+
+
 
     #encoder_path = os.path.join(project_path, "model", "encoder.pkl")
     #save_model(encoder, encoder_path)
+
+    encoder_path = os.path.join(MODEL_DIR, f"{model_name}_encoder.pkl")
+    print(encoder_path)
 
     # load the model
     #model = load_model(
