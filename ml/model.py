@@ -177,23 +177,23 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, save_dir, model_nam
 
     base_filename = model_name or io_cfg.get("model_name", "model")
 
-    suffixes = io_cfg.get("file_name_suffixes") or {})
+    suffixes = (io_cfg.get("file_name_suffixes") or {})
     
     suffix_model = suffixes.get("model", "_model.pkl")
     suffix_encoder = suffixes.get("encoder", "_encoder.pkl")
     suffix_label_binarizer = suffixes.get("label_binarizer", "_label_binarizer.pkl")
     suffix_metrics = suffixes.get("metrics", "_metrics.json")
-    suffix_params = suffixes.get("params", "_params.json")
+    suffix_parameters = suffixes.get("parameters", "_params.json")
 
     model_file_path = save_dir / f"{base_filename}{suffix_model}"
     encoder_file_path = save_dir / f"{base_filename}{suffix_encoder}"
     label_binarizer_file_path = save_dir / f"{base_filename}{suffix_label_binarizer}"
     metrics_file_path = save_dir / f"{base_filename}{suffix_metrics}"
-    params_file_path = save_dir / f"{base_filename}{suffix_params}"
+    parameters_file_path = save_dir / f"{base_filename}{suffix_parameters}"
 
-    overwrite_flag = bool(io_cfg.get("allow_overwrite", True))
+    allow_overwrite  = bool(io_cfg.get("allow_overwrite", True))
 
-    files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path, metrics_file_path, params_file_path]
+    files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path, metrics_file_path, parameters_file_path]
 
     existing_files_list = []
 
@@ -201,24 +201,51 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, save_dir, model_nam
         if file.exists()
             existing_files_list.append(file)
 
-    if existing_files_list and not overwrite_flag:
-        raise FileExistsError(f"File exists and overwrite protection enabled")
+    if existing_files_list and not allow_overwrite :
+
+        resolved_existing_files_list = []
+        
+        for file in existing_files_list:
+            absolute_path = file.resolve()
+            absolute_path_string = str(absolute_path)
+            resolved_existing_files_list.append(absolute_path_string)
+
+        existing_files_list_str = "\n - ".join(resolved_existing_files_list)
+        
+        # One line variant for lines 206-213
+        #existing_files_list_str = "\n  - ".join(str(file.resolve()) for file in existing_files_list)
+
+        raise FileExistsError(f"Save aborted! File was detected and overwrite protections are enabled: \n"
+                              f"- {existing_files_list_str}\n"
+                              "Either change overwrite protection in _base.yaml from io.allow_overwrite: true or select a different name for save"
+        )
+
+
+
 
     with open(model_file_path, "wb") as f:
-        pickle.dump(model, f)
+        pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     with open(encoder_file_path, "wb") as f:
-        pickle.dump(encoder, f)
+        pickle.dump(encoder, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     with open(label_binarizer_file_path_file_path, "wb") as f:
-        pickle.dump(label_binarizer, f)
+        pickle.dump(label_binarizer, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     with open(metrics_file_path, "w", encoding="utf-8") as f:
         json.dump(metrics, f, indent=2)
 
-    with open(params_file_path, "w", encoding="utf-8") as f:
-        json.dump(params, f, indent=2)
+    with open(parameters_file_path, "w", encoding="utf-8") as f:
+        json.dump(parameters, f, indent=2)
 
+    return {
+        "model_path": model_file_path,
+        "encoder_path": encoder_file_path,
+        "label_binarizer_path": label_binarizer_file_path,
+        "metrics_path": metrics_file_path,
+        "parameters_path": parameters_file_path,
+        "save_dir": save_dir,
+    }
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 

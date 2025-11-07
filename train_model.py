@@ -5,7 +5,7 @@ import logging
 
 
 import pandas as pd
-from sklearn.model_selection import train_test_split, StratifiedKFold
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 
 from ml.data import process_data
 from ml.model import (
@@ -185,8 +185,11 @@ def main():
 
     def data_split_kfold(data, cfg):
 
+        model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
+
         fold_metrics = []
-        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+        
+        skf = StratifiedKFold(n_splits=train.get("cv_folds"), shuffle=True, random_state=train_cfg.get("random_state"))
 
         for fold, (train_idx, val_idx) in enumerate(skf.split(data, data[train_cfg.get("target")]), 1):
 
