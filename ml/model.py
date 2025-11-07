@@ -158,7 +158,7 @@ def inference(model, X, proba=False, threshold=0.5):
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-def save_model(model, encoder, lb, cfg, metrics, parameters, model_dir, model_name):
+def save_model(model, encoder, lb, cfg, metrics, parameters, save_dir, model_name):
     """ Serializes model to a file.
 
     Inputs
@@ -171,19 +171,54 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, model_dir, model_na
     # TODO: implement the function
     #pass
 
-    #suffixes = _add_suffixes(cfg)    
+    model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
+
+    save_dir = save_dir
+
+    base_filename = model_name or io_cfg.get("model_name", "model")
+
+    suffixes = io_cfg.get("file_name_suffixes") or {})
     
-    #with open(, 'wb') as file:
-    #    pickle.dump(model, file)
+    suffix_model = suffixes.get("model", "_model.pkl")
+    suffix_encoder = suffixes.get("encoder", "_encoder.pkl")
+    suffix_label_binarizer = suffixes.get("label_binarizer", "_label_binarizer.pkl")
+    suffix_metrics = suffixes.get("metrics", "_metrics.json")
+    suffix_params = suffixes.get("params", "_params.json")
 
+    model_file_path = save_dir / f"{base_filename}{suffix_model}"
+    encoder_file_path = save_dir / f"{base_filename}{suffix_encoder}"
+    label_binarizer_file_path = save_dir / f"{base_filename}{suffix_label_binarizer}"
+    metrics_file_path = save_dir / f"{base_filename}{suffix_metrics}"
+    params_file_path = save_dir / f"{base_filename}{suffix_params}"
 
+    overwrite_flag = bool(io_cfg.get("allow_overwrite", True))
 
-    '''
-    if not io_cfg.get("allow_overwrite", True):
-        expected = [path / name for name in io_cfg["file_name_suffixes"].values()]
-        if any(path.exists() for path in expected):
-            raise FileExistsError(f"Artifacts already exist under {path}")
-    '''
+    files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path, metrics_file_path, params_file_path]
+
+    existing_files_list = []
+
+    for file in files_to_check_for:
+        if file.exists()
+            existing_files_list.append(file)
+
+    if existing_files_list and not overwrite_flag:
+        raise FileExistsError(f"File exists and overwrite protection enabled")
+
+    with open(model_file_path, "wb") as f:
+        pickle.dump(model, f)
+
+    with open(encoder_file_path, "wb") as f:
+        pickle.dump(encoder, f)
+
+    with open(label_binarizer_file_path_file_path, "wb") as f:
+        pickle.dump(label_binarizer, f)
+
+    with open(metrics_file_path, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2)
+
+    with open(params_file_path, "w", encoding="utf-8") as f:
+        json.dump(params, f, indent=2)
+
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 

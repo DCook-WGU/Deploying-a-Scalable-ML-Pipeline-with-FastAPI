@@ -227,6 +227,7 @@ def main():
     mean_precision, mean_recall, mean_fbeta = data_split_kfold(data, cfg)
     
 
+
     X_full, y_full, encoder, lb = process_data(
         data,
         categorical_features = cat_features,
@@ -255,6 +256,7 @@ def main():
         metrics=final_metrics,
         parameters=params,
         save_dir=save_dir,
+        model_name = model_name
 )
 
 
