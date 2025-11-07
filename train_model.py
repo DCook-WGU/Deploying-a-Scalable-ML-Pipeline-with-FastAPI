@@ -5,7 +5,7 @@ import logging
 
 
 import pandas as pd
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split, StratifiedKFold
 
 from ml.data import process_data
 from ml.model import (
@@ -17,7 +17,7 @@ from ml.model import (
     train_model,
 )
 
-from ml.config import load_config, get_model_name_from_cfg
+from ml.config import load_config, get_model_name_from_cfg, parse_cfg
 
 from ml.paths import APP_ROOT, DATA_DIR, MODEL_DIR
 
@@ -27,39 +27,64 @@ logger = logging.getLogger(__name__)
 
 
 def parse_args():
+
     parser = argparse.ArgumentParser(
         description="Train a model using the provided YAML configuration file."
     )
+
+    # Configs
     parser.add_argument(
+        "-c", 
         "--config",
         required=False,
         help="Path to the YAML configuration file (e.g. configs/random_forest.yaml)",
     )
+
+     # Data Files
     parser.add_argument(
-        "--model",
-        required=False,
-        help="Path to the YAML configuration file (e.g. configs/random_forest.yaml)",
+        "--data-dir", 
+        help="Override io.data_dir"
     )
+    parser.add_argument(
+        "--data-file", 
+        help="Override io.data_file"
+    )
+    parser.add_argument(
+        "--data-path", 
+        help="Direct file path (bypass data_dir/data_file)"
+    )
+
     return parser.parse_args()
 
 
-def parse_cfg(cfg):
+def apply_cli_overrides(cfg, args):
     
-    print("Model Config Parameters")
-    model_cfg = cfg.get("model", {})
-    print(model_cfg)
-    print()
-    print("Train Config Parameters")
-    train_cfg = cfg.get("train", {})
-    print(train_cfg)
-    print()
+    io_cfg = cfg.setdefault("io", {})
 
-    print("IO Config Parameters")
-    io_cfg = cfg.get("io", {})
-    print(io_cfg)
-    print()
+    # Data Files
+    if args.data_dir:  io_cfg["data_dir"]  = args.data_dir
+    if args.data_file: io_cfg["data_file"] = args.data_file
+    if args.data_path: io_cfg["data_path"] = args.data_path
 
-    return model_cfg, train_cfg, io_cfg
+    return cfg
+
+
+def load_data(cfg):
+
+    io_cfg = cfg.get("io", {}) if cfg else {}
+
+    data_path = DATA_DIR
+    data_filename = io_cfg.get("data_file")
+
+    data_file_path = os.path.join(data_path, data_filename)
+    print(f"Date File Path: {data_file_path}")
+
+    #data = None # your code here
+    data = pd.read_csv(data_file_path)
+
+    return data
+
+
 
 def resolve_model_path(cfg):
     io_cfg = cfg.get("io", {}) if cfg else {}
@@ -96,40 +121,17 @@ def main():
         cfg = load_config("configs/random_forest.yaml")
         print(f"No configuration file was provided, using default - Random Forest Classifier")
 
-    print("CFG TYPE:", type(cfg))
-    print("CFG KEYS:", list(cfg.keys()))
-
-
-    #print(cfg)
-
-    #print("Model Config Parameters")
-    #model_cfg = cfg.get("model", {})
-    #print(model_cfg)
-
-    #print("Train Config Parameters")
-    #train_cfg = cfg.get("train", {})
-    #print(train_cfg)
-
-    #print("IO Config Parameters")
-    #io_cfg = cfg.get("io", {})
-    #print(io_cfg)
-
+    cfg = apply_cli_overrides(cfg, args)
 
     model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
-
-    #model_directory = MODEL_DIR
-    #print(f"Model Directory Name: {model_directory}")
-
-    #model_subdirectory = io_cfg.get("model_subdir")
-    #print(f"Model Subdirectory Name: {model_subdirectory}")
-
-    #model_name = get_model_name_from_cfg(cfg)
-    #model_name = cfg.get("model_subdir") or get_model_name_from_cfg(cfg)
-    #print(f"Model Name: {model_name}")
-
-    #save_directory = model_directory / model_subdirectory
-    #print(f"Save Directory: {save_directory}")
-    #print(type(save_directory))
+    
+    print()
+    print(model_cfg)
+    print()
+    print(train_cfg)
+    print()
+    print(io_cfg)
+    print()
 
 
     save_dir, model_name = resolve_model_path(cfg)
@@ -143,20 +145,8 @@ def main():
     #project_path = DATA_DIR
     #data_path = os.path.join(project_path, "data", "census.csv")
 
-    project_path = APP_ROOT
-    print(f"Project Path: {project_path}")
 
-    data_path = DATA_DIR
-    print(f"Data Path: {data_path}")
-
-    data_filename = io_cfg.get("data_file")
-    print(f"Data FileName: {data_filename}")
-
-    data_file_path = os.path.join(data_path, data_filename)
-    print(f"Date File Path: {data_file_path}")
-
-    #data = None # your code here
-    data = pd.read_csv(data_file_path)
+    data = load_data(cfg)
 
     data.head()
     data.info()
@@ -166,17 +156,18 @@ def main():
     # Optional enhancement, use K-fold cross validation instead of a train-test split.
     #train, test = None, None# Your code here
 
-    X = data.drop(train_cfg.get("target"), axis=1)
-    print(X.info())
-    print(X.head(5))
-    y = data[train_cfg.get("target")]
-    print(y.info())
-    print(y.head(5))
+    #X = data.drop(train_cfg.get("target"), axis=1)
+    #print(X.info())
+    #print(X.head(5))
+    #y = data[train_cfg.get("target")]
+    #print(y.info())
+    #print(y.head(5))
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_cfg.get("test_size"), random_state=train_cfg.get("random_state"))
+    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_cfg.get("test_size"), random_state=train_cfg.get("random_state"))
 
-    print(X_train.info())
-    print(X_test.info())
+    #print(X_train.info())
+    #print(X_test.info())
+
 
     # DO NOT MODIFY
     cat_features = [
@@ -190,6 +181,83 @@ def main():
         "native-country",
     ]
 
+
+
+    def data_split_kfold(data, cfg):
+
+        fold_metrics = []
+        skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=42)
+
+        for fold, (train_idx, val_idx) in enumerate(skf.split(data, data[train_cfg.get("target")]), 1):
+
+            train_df = data.iloc[train_idx]
+            val_df = data.iloc[val_idx]
+
+            X_train, y_train, encoder, lb = process_data(
+                train_df,
+                categorical_features=cat_features,
+                label=train_cfg.get("target"),
+                training = True
+            )
+
+            X_val, y_val, _, _ = process_data(
+                val_df,
+                categorical_features=cat_features,
+                label=train_cfg.get("target"),
+                training = False,
+                encoder = encoder,
+                lb = lb
+            )
+
+            model = train_model(X_train, y_train, cfg=cfg)
+
+            preds = inference(model, X_test, proba=False)
+
+            precision, recall, fbeta = compute_model_metrics(y_val, preds)
+
+            fold_metrics.append((precision, recall, fbeta))
+
+        fold_metrics = np.array(fold_metrics)
+
+        mean_precision, mean_recall, mean_fbeta = np.mean(fold_metrics, axis=0)
+
+        return mean_precision, mean_recall, mean_fbeta 
+
+
+    mean_precision, mean_recall, mean_fbeta = data_split_kfold(data, cfg)
+    
+
+    X_full, y_full, encoder, lb = process_data(
+        data,
+        categorical_features = cat_features,
+        label = train_cfg.get("target"),
+        training = True
+    )
+
+    model = train_model(X_full, y_full, cfg=cfg)
+
+    predictions_full = inference(model, x_full, proba=False)
+
+    precision_full, recall_full, fbeta_full = compute_model_metrics(y_full, predictions_full)
+
+    final_meterics = {"precision": float(precision_full), "recall": float(recall_full), "fbeta": float(fbeta_full)}
+
+    print(final_meterics)
+
+    params = model_cfg.get("params")
+    
+
+    save_model(
+        model=model,
+        encoder=encoder,
+        lb=lb,
+        cfg=cfg,
+        metrics=final_metrics,
+        parameters=params,
+        save_dir=save_dir,
+)
+
+
     '''
     # TODO: use the process_data function provided to process the data.
     X_train, y_train, encoder, lb = process_data(
@@ -198,7 +266,7 @@ def main():
         # use training=True
         # do not need to pass encoder and lb as input
         )
-    '''
+    
     X_train, y_train, encoder, lb = process_data(
         X_train_df,
         categorical_features=cat_features,
@@ -215,9 +283,9 @@ def main():
         lb=lb,
     )
 
-    
+    '''
     # TODO: use the train_model function to train the model on the training dataset
-    model = None # your code here
+    #model = None # your code here
     #model = train_model(X_train, y_train, cfg=cfg)
 
     # save the model and the encoder
@@ -236,17 +304,12 @@ def main():
     #print(encoder_path)
 
     # load the model
-    if args.model and args.model.strip():
-        model_path = os.path.join(MODEL_DIR, model_name, )
 
-        print(f"Model provided, opening model")
-    else:
-        model_path = os.path.join(MODEL_DIR, "random_forest", "random_forest_model.pkl")
 
     #model = load_model()
 
     # TODO: use the inference function to run the model inferences on the test dataset.
-    preds = None # your code here
+    #preds = None # your code here
 
     '''
     # Calculate and print the metrics

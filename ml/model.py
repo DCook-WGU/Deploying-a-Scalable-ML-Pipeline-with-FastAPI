@@ -5,19 +5,41 @@ from ml.data import process_data
 
 from sklearn.ensemble import RandomForestClassifier
 
-from typing import Dict, Any
+from typing import Any, Dict, Optional
 import importlib
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-def _build_estimator(class_path: str, parameters: Dict[str, Any] = None, default_random_state: int = 42):
+def _filter_params_for_cls(cls, params: Dict[str, Any]) -> Dict[str, Any]:
 
-    if class_path:
+    try:
+        inst = cls()  
+        valid = set(getattr(inst, "get_params")().keys())
+        return {key: value for key, value in params.items() if key in valid}
+    except Exception:
+        return params  
+
+#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
+
+
+def _build_estimator(cfg: Dict[str, Any] = None, class_path: str, parameters: Dict[str, Any] = None, default_random_state: int = 42):
+
+    if cfg:
+        model_cfg = cfg.get("model", {}) or {}
+        train_cfg = cfg.get("train", {}) or {}
+        class_path = class_path or model_cfg.get("class_path")
+        parameters = parameters or model_cfg.get("params", {})
+        default_random_state = train_cfg.get("random_state", default_random_state)
+
+    if not class_path:
+        class_path = "sklearn.ensemble.RandomForestClassifier"
+
+    try:
         module_path, class_name = class_path.rsplit(".", 1)
         module = importlib.import_module(module_path)
         cls = getattr(module, class_name)
-    else:
-        cls = RandomForestClassifier
+    except(ImportError, AttributeError, ValueError) as e:
+        raise ImportError(f"Could not import model: '{class_path}':{e}")
 
     parameters = dict(parameters or {})
 
@@ -28,7 +50,12 @@ def _build_estimator(class_path: str, parameters: Dict[str, Any] = None, default
         except TypeError:
             Pass
 
+    parameters = _filter_params_for_cls(cls, parameters)
+
     return cls(**parameters)
+
+
+
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
@@ -50,7 +77,7 @@ def _add_suffixes(cfg):
 
 
 # Optional: implement hyperparameter tuning.
-def train_model(X_train, y_train):
+def train_model(X_train, y_train, cfg):
     """
     Trains a machine learning model and returns it.
 
@@ -66,11 +93,12 @@ def train_model(X_train, y_train):
         Trained machine learning model.
     """
     # TODO: implement the function
-    pass
+    #pass
 
+    model = _build_estimator(cfg)
+    model.fit(X_train, Y_train)
 
-
-    #model = _build_estimator(class_path, parameters, default_random_state=random_state)
+    return model
 
 
 
@@ -94,15 +122,17 @@ def compute_model_metrics(y, preds):
     recall : float
     fbeta : float
     """
+
     fbeta = fbeta_score(y, preds, beta=1, zero_division=1)
     precision = precision_score(y, preds, zero_division=1)
     recall = recall_score(y, preds, zero_division=1)
+
     return precision, recall, fbeta
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-def inference(model, X):
+def inference(model, X, proba=False, threshold=0.5):
     """ Run model inferences and return the predictions.
 
     Inputs
@@ -117,7 +147,13 @@ def inference(model, X):
         Predictions from the model.
     """
     # TODO: implement the function
-    pass
+    #pass
+
+    if proba:
+        probs = model.predict_proba(X)[:, 1]
+        return (probs >= threshold).astype(int), probs
+    else:
+        return model.predict(X)
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
@@ -136,9 +172,7 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, model_dir, model_na
     #pass
 
     #suffixes = _add_suffixes(cfg)    
-
-
-
+    
     #with open(, 'wb') as file:
     #    pickle.dump(model, file)
 

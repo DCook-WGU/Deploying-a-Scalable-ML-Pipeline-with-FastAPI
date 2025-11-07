@@ -59,3 +59,23 @@ def clean_model_name(name: str):
 
     # Removes classifier, regressor, model from the name
     return re.sub(r"_(classifier|regressor|model)$", "", snake)
+
+
+def parse_cfg(cfg):
+    
+    #print("Model Config Parameters")
+    model_cfg = cfg.get("model", {})
+    #print(model_cfg)
+    #print()
+    
+    #print("Train Config Parameters")
+    train_cfg = cfg.get("train", {})
+    #print(train_cfg)
+    #print()
+
+    #print("IO Config Parameters")
+    io_cfg = cfg.get("io", {})
+    #print(io_cfg)
+    #print()
+
+    return model_cfg, train_cfg, io_cfg
