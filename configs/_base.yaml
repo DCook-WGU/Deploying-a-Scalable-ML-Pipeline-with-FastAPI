@@ -3,10 +3,12 @@ io:
   model_dir: "model"                     
   model_subdir: null                      
   allow_overwrite: true                   
-  base_names:
+  file_name_suffixes:
     model: "_model.pkl"
     encoder: "_encoder.pkl"
     label_binarizer: "_label_binarizer.pkl"
+    parameters: "_parameters.json"
+    metrics: "_metrics.json"
 
 train:
   target: "salary"

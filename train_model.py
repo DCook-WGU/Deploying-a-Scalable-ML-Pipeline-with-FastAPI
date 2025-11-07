@@ -1,6 +1,8 @@
 import argparse 
 import os
 from pathlib import Path
+import logging
+
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -21,6 +23,9 @@ from ml.paths import APP_ROOT, DATA_DIR, MODEL_DIR
 
 
 
+logger = logging.getLogger(__name__)
+
+
 def parse_args():
     parser = argparse.ArgumentParser(
         description="Train a model using the provided YAML configuration file."
@@ -38,7 +43,42 @@ def parse_args():
     return parser.parse_args()
 
 
+def parse_cfg(cfg):
+    
+    print("Model Config Parameters")
+    model_cfg = cfg.get("model", {})
+    print(model_cfg)
+    print()
+    print("Train Config Parameters")
+    train_cfg = cfg.get("train", {})
+    print(train_cfg)
+    print()
 
+    print("IO Config Parameters")
+    io_cfg = cfg.get("io", {})
+    print(io_cfg)
+    print()
+
+    return model_cfg, train_cfg, io_cfg
+
+def resolve_model_path(cfg):
+    io_cfg = cfg.get("io", {}) if cfg else {}
+
+    # Default model name
+    model_name = io_cfg.get("model_name") or get_model_name_from_cfg(cfg)
+
+    # If a subdirectory is specified, use it — otherwise, save directly under MODEL_DIR/model_name
+    model_subdir = io_cfg.get("model_subdir")
+
+    if model_subdir:
+        save_dir = (MODEL_DIR / model_subdir).resolve()
+    else:
+        save_dir = (MODEL_DIR / model_name).resolve()
+
+    save_dir.mkdir(parents=True, exist_ok=True)
+
+    return save_dir, model_name
+    
 
 def main():
 
@@ -60,54 +100,42 @@ def main():
     print("CFG KEYS:", list(cfg.keys()))
 
 
-    print(cfg)
+    #print(cfg)
 
-    print("Model Config Parameters")
-    model_cfg = cfg.get("model", {})
-    print(model_cfg)
+    #print("Model Config Parameters")
+    #model_cfg = cfg.get("model", {})
+    #print(model_cfg)
 
-    print("Train Config Parameters")
-    train_cfg = cfg.get("train", {})
-    print(train_cfg)
+    #print("Train Config Parameters")
+    #train_cfg = cfg.get("train", {})
+    #print(train_cfg)
 
-    print("IO Config Parameters")
-    io_cfg = cfg.get("io", {})
-    print(io_cfg)
+    #print("IO Config Parameters")
+    #io_cfg = cfg.get("io", {})
+    #print(io_cfg)
 
-    model_directory = MODEL_DIR
-    print(f"Model Directory Name: {model_directory}")
 
-    model_subdirectory = io_cfg.get("model_subdir")
-    print(f"Model Subdirectory Name: {model_subdirectory}")
+    model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
+
+    #model_directory = MODEL_DIR
+    #print(f"Model Directory Name: {model_directory}")
+
+    #model_subdirectory = io_cfg.get("model_subdir")
+    #print(f"Model Subdirectory Name: {model_subdirectory}")
 
     #model_name = get_model_name_from_cfg(cfg)
-    model_name = cfg.get("model_subdir") or get_model_name_from_cfg(cfg)
+    #model_name = cfg.get("model_subdir") or get_model_name_from_cfg(cfg)
+    #print(f"Model Name: {model_name}")
+
+    #save_directory = model_directory / model_subdirectory
+    #print(f"Save Directory: {save_directory}")
+    #print(type(save_directory))
+
+
+    save_dir, model_name = resolve_model_path(cfg)
+    
+    print(f"Save directory: {save_dir}")
     print(f"Model Name: {model_name}")
-
-    save_directory = model_directory / model_subdirectory
-    print(f"Save Directory: {save_directory}")
-    print(type(save_directory))
-
-
-    custom_model_dir = io_cfg.get('model_dir')
-
-    if custom_model_dir:
-    
-        custom_model_dir_path = Path(custom_model_dir)
-    
-        if not custom_model_dir_path.is_absolute():
-            custom_model_dir_path = (MODEL_DIR.parent / custom_model_dir_path).resolve()
-        
-        default_directory = MODEL_DIR.resolve()
-        print(f"default directory path: {default_directory}")
-
-        if custom_model_dir_path != default_directory:
-            model_directory = custom_model_dir_path
-
-            print(f"Custom directory assigned: {custom_model_dir_path}")
-
-        print(f"Model Directory: {model_directory}")
-       
 
 
     # TODO: load the cencus.csv data

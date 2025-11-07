@@ -38,11 +38,11 @@ def _add_suffixes(cfg):
         "model": "_model.pkl",
         "encoder": "_encoder.pkl",
         "label_binarizer": "_label_binarizer.pkl",
-        "metrics": "metrics.json",
         "params": "params.json",
+        "metrics": "metrics.json",
     }
 
-    return {**defaults, **(cfg.get("io", {}).get("base_names", {}) )}
+    return {**defaults, **(cfg.get("io", {}).get("file_name_suffixes", {}) )}
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
@@ -146,7 +146,7 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, model_dir, model_na
 
     '''
     if not io_cfg.get("allow_overwrite", True):
-        expected = [path / name for name in io_cfg["base_names"].values()]
+        expected = [path / name for name in io_cfg["file_name_suffixes"].values()]
         if any(path.exists() for path in expected):
             raise FileExistsError(f"Artifacts already exist under {path}")
     '''
