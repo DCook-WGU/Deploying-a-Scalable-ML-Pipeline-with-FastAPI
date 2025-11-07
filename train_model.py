@@ -1,5 +1,6 @@
 import argparse 
 import os
+from pathlib import Path
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -73,15 +74,40 @@ def main():
     io_cfg = cfg.get("io", {})
     print(io_cfg)
 
-    #model_name = get_model_name_from_cfg(cfg)
-    model_name = cfg.get("model_subdir") or get_model_name_from_cfg(cfg)
-    print(f"Model Name: {model_name}")
+    model_directory = MODEL_DIR
+    print(f"Model Directory Name: {model_directory}")
 
     model_subdirectory = io_cfg.get("model_subdir")
     print(f"Model Subdirectory Name: {model_subdirectory}")
 
-    model_directory = io_cfg.get("model_dir")
-    print(f"Model Directory Name: {model_directory}")
+    #model_name = get_model_name_from_cfg(cfg)
+    model_name = cfg.get("model_subdir") or get_model_name_from_cfg(cfg)
+    print(f"Model Name: {model_name}")
+
+    save_directory = model_directory / model_subdirectory
+    print(f"Save Directory: {save_directory}")
+    print(type(save_directory))
+
+
+    custom_model_dir = io_cfg.get('model_dir')
+
+    if custom_model_dir:
+    
+        custom_model_dir_path = Path(custom_model_dir)
+    
+        if not custom_model_dir_path.is_absolute():
+            custom_model_dir_path = (MODEL_DIR.parent / custom_model_dir_path).resolve()
+        
+        default_directory = MODEL_DIR.resolve()
+        print(f"default directory path: {default_directory}")
+
+        if custom_model_dir_path != default_directory:
+            model_directory = custom_model_dir_path
+
+            print(f"Custom directory assigned: {custom_model_dir_path}")
+
+        print(f"Model Directory: {model_directory}")
+       
 
 
     # TODO: load the cencus.csv data
@@ -110,7 +136,19 @@ def main():
 
     # TODO: split the provided data to have a train dataset and a test dataset
     # Optional enhancement, use K-fold cross validation instead of a train-test split.
-    train, test = None, None# Your code here
+    #train, test = None, None# Your code here
+
+    X = data.drop(train_cfg.get("target"), axis=1)
+    print(X.info())
+    print(X.head(5))
+    y = data[train_cfg.get("target")]
+    print(y.info())
+    print(y.head(5))
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_cfg.get("test_size"), random_state=train_cfg.get("random_state"))
+
+    print(X_train.info())
+    print(X_test.info())
 
     # DO NOT MODIFY
     cat_features = [

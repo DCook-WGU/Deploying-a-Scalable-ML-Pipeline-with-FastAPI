@@ -30,6 +30,20 @@ def _build_estimator(class_path: str, parameters: Dict[str, Any] = None, default
 
     return cls(**parameters)
 
+#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
+
+def _add_suffixes(cfg):
+
+    defaults = {
+        "model": "_model.pkl",
+        "encoder": "_encoder.pkl",
+        "label_binarizer": "_label_binarizer.pkl",
+        "metrics": "metrics.json",
+        "params": "params.json",
+    }
+
+    return {**defaults, **(cfg.get("io", {}).get("base_names", {}) )}
+
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
@@ -108,7 +122,7 @@ def inference(model, X):
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-def save_model(model, path):
+def save_model(model, encoder, lb, cfg, metrics, parameters, model_dir, model_name):
     """ Serializes model to a file.
 
     Inputs
@@ -119,10 +133,23 @@ def save_model(model, path):
         Path to save pickle file.
     """
     # TODO: implement the function
-    pass
+    #pass
+
+    #suffixes = _add_suffixes(cfg)    
 
 
-    
+
+    #with open(, 'wb') as file:
+    #    pickle.dump(model, file)
+
+
+
+    '''
+    if not io_cfg.get("allow_overwrite", True):
+        expected = [path / name for name in io_cfg["base_names"].values()]
+        if any(path.exists() for path in expected):
+            raise FileExistsError(f"Artifacts already exist under {path}")
+    '''
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
