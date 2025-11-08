@@ -182,6 +182,8 @@ def main():
         "native-country",
     ]
 
+    train_df, holdout_df = train_test_split(data, test_size=train_cfg.get("holdout_size"), stratify=data[train_cfg.get("target")], random_state=train_cfg.get("random_state"))
+
 
 
     def data_split_kfold(data, cfg):
@@ -235,12 +237,11 @@ def main():
         return mean_precision, mean_recall, mean_fbeta 
 
 
-    mean_precision, mean_recall, mean_fbeta = data_split_kfold(data, cfg)
+    mean_precision, mean_recall, mean_fbeta = data_split_kfold(train_df, cfg)
     
 
-
     X_full, y_full, encoder, label_binarizer = process_data(
-        data,
+        train_df,
         categorical_features = cat_features,
         label = train_cfg.get("target"),
         training = True
@@ -329,15 +330,29 @@ def main():
     #p, r, fb = compute_model_metrics(y_test, preds)
     #print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}")
 
+    
+
     # TODO: compute the performance on model slices using the performance_on_categorical_slice function
     # iterate through the categorical features
     for col in cat_features:
         # iterate through the unique values in one categorical feature
-        for slicevalue in sorted(test[col].unique()):
-            count = test[test[col] == slicevalue].shape[0]
+        #for slicevalue in sorted(test[col].unique()):
+        for slicevalue in sorted(holdout_df[col].unique()):
+            count = int((holdout_df[col] == slicevalue).sum())
+            
             p, r, fb = performance_on_categorical_slice(
                 # your code here
                 # use test, col and slicevalue as part of the input
+                
+                data=holdout_df,
+                column_name=col,
+                slice_value = slicevalue,
+                categorical_features=cat_features,
+                label=train_cfg.get("target"),
+                encoder=encoder,
+                label_binarizer=label_binarizer,
+                model=model
+
             )
             with open("slice_output.txt", "a") as f:
                 print(f"{col}: {slicevalue}, Count: {count:,}", file=f)

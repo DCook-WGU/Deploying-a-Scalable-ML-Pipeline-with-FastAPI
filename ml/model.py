@@ -313,8 +313,11 @@ def performance_on_categorical_slice(
         # use training = False
     #)
 
+    df_slice = data[data[column_name] == slice_value]
+
+
     X_slice, y_slice, _, _ = process_data(
-        data,
+        df_slice,
         categorical_features = cat_features,
         label = train_cfg.get("target"),
         training = False,
@@ -324,10 +327,10 @@ def performance_on_categorical_slice(
 
 
     #preds = None # your code here to get prediction on X_slice using the inference function
-    slice_preds = inference(model, X_slice)
+    slice_predictions = inference(model, X_slice)
 
     #precision, recall, fbeta = compute_model_metrics(y_slice, preds)
-    slice_precision, slice_recall, slice_fbeta = compute_model_metrics(y_slice, slice_preds)
+    slice_precision, slice_recall, slice_fbeta = compute_model_metrics(y_slice, slice_predictions)
 
 
     #return precision, recall, fbeta
