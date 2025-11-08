@@ -1,10 +1,13 @@
 import argparse 
 import os
 from pathlib import Path
-import logging
 
 import numpy as np
 import pandas as pd
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 
@@ -20,12 +23,7 @@ from ml.model import (
 )
 
 from ml.config import load_config, get_model_name_from_cfg, parse_cfg
-
 from ml.paths import APP_ROOT, DATA_DIR, MODEL_DIR
-
-
-
-logger = logging.getLogger(__name__)
 
 
 def parse_args():
@@ -79,7 +77,7 @@ def load_data(cfg):
     data_filename = io_cfg.get("data_file")
 
     data_file_path = os.path.join(data_path, data_filename)
-    print(f"Date File Path: {data_file_path}")
+    logger.info(f"Date File Path: {data_file_path}")
 
     #data = None # your code here
     data = pd.read_csv(data_file_path)
@@ -118,57 +116,30 @@ def main():
     # Load Config via arguments
     if args.config and args.config.strip():
         cfg = load_config(args.config)
-        print(f"Configuration Found and Loaded: {cfg}")
+        logger.info(f"Configuration Found and Loaded: {cfg}")
     else:
         cfg = load_config("configs/random_forest.yaml")
-        print(f"No configuration file was provided, using default - Random Forest Classifier")
+        logger.info(f"No configuration file was provided, using default - Random Forest Classifier")
 
     cfg = apply_cli_overrides(cfg, args)
 
     model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
     
-    print()
-    print(model_cfg)
-    print()
-    print(train_cfg)
-    print()
-    print(io_cfg)
-    print()
+    logger.info(model_cfg)
+    logger.info(train_cfg)
+    logger.info(io_cfg)
 
 
     save_dir, model_name = resolve_model_path(cfg)
     
-    print(f"Save directory: {save_dir}")
-    print(f"Model Name: {model_name}")
-
-
-    # TODO: load the cencus.csv data
-    #project_path = "Your path here"
-    #project_path = DATA_DIR
-    #data_path = os.path.join(project_path, "data", "census.csv")
+    logger.info(f"Save directory: {save_dir}")
+    logger.info(f"Model Name: {model_name}")
 
 
     data = load_data(cfg)
 
     data.head()
     data.info()
-
-
-    # TODO: split the provided data to have a train dataset and a test dataset
-    # Optional enhancement, use K-fold cross validation instead of a train-test split.
-    #train, test = None, None# Your code here
-
-    #X = data.drop(train_cfg.get("target"), axis=1)
-    #print(X.info())
-    #print(X.head(5))
-    #y = data[train_cfg.get("target")]
-    #print(y.info())
-    #print(y.head(5))
-
-    #X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=train_cfg.get("test_size"), random_state=train_cfg.get("random_state"))
-
-    #print(X_train.info())
-    #print(X_test.info())
 
 
     # DO NOT MODIFY
@@ -222,7 +193,7 @@ def main():
 
             precision, recall, fbeta = compute_model_metrics(y_val, preds)
 
-            print(f"Precision: {precision:.4f} | Recall: {recall:.4f} | Fβ: {fbeta:.4f}")
+            logger.info(f"Precision: {precision:.4f} | Recall: {recall:.4f} | Fβ: {fbeta:.4f}")
 
             fold_metrics.append((precision, recall, fbeta))
 
@@ -230,10 +201,10 @@ def main():
         
         mean_precision, mean_recall, mean_fbeta = np.mean(fold_metrics, axis=0)
 
-        print("\n=== Cross-validation Summary ===")
-        print(f"Mean Precision: {mean_precision:.4f}")
-        print(f"Mean Recall:    {mean_recall:.4f}")
-        print(f"Mean Fβ:        {mean_fbeta:.4f}")
+        logger.info("\n=== Cross-validation Summary ===")
+        logger.info(f"Mean Precision: {mean_precision:.4f}")
+        logger.info(f"Mean Recall:    {mean_recall:.4f}")
+        logger.info(f"Mean Fβ:        {mean_fbeta:.4f}")
 
         return mean_precision, mean_recall, mean_fbeta 
 
@@ -256,7 +227,7 @@ def main():
 
     final_metrics = {"precision": float(precision_full), "recall": float(recall_full), "fbeta": float(fbeta_full)}
 
-    print(final_metrics)
+    logger.info(final_metrics)
 
     params = model_cfg.get("params")
     
@@ -272,82 +243,20 @@ def main():
         model_name = model_name
 )
 
-
-    '''
-    # TODO: use the process_data function provided to process the data.
-    X_train, y_train, encoder, lb = process_data(
-        # your code here
-        # use the train dataset 
-        # use training=True
-        # do not need to pass encoder and lb as input
-        )
-    
-    X_train, y_train, encoder, lb = process_data(
-        X_train_df,
-        categorical_features=cat_features,
-        label=train_cfg.get("target"),
-        training=True
-    )
-
-    X_test, y_test, _, _ = process_data(
-        test,
-        categorical_features=cat_features,
-        label="salary",
-        training=False,
-        encoder=encoder,
-        lb=lb,
-    )
-
-    '''
-    # TODO: use the train_model function to train the model on the training dataset
-    #model = None # your code here
-    #model = train_model(X_train, y_train, cfg=cfg)
-
-    # save the model and the encoder
-    #model_path = os.path.join(project_path, "model", "model.pkl")
-    #save_model(model, model_path)
-
-    #model_path = os.path.join(MODEL_DIR, cfg.get("model_subdir"), f"{model_name}_model.pkl")
-    #print(model_path)
-
-
-
-    #encoder_path = os.path.join(project_path, "model", "encoder.pkl")
-    #save_model(encoder, encoder_path)
-
-    #encoder_path = os.path.join(MODEL_DIR, cfg.get("model_subdir"), f"{model_name}_encoder.pkl")
-    #print(encoder_path)
-
-    # load the model
-
-
-    #model = load_model()
-    
-    
     model, encoder, label_binarizer = load_model_full(model_name, cfg)
 
-    print(type(model))
-    print(type(encoder))
-    print(type(label_binarizer))
+    logger.info(type(model))
+    logger.info(type(encoder))
+    logger.info(type(label_binarizer))
 
-    print(hasattr(model, "fit"))  # should be True
-    print(hasattr(model, "predict"))  # should be True
-    print(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
-    print(hasattr(encoder, "categories_"))  # confirms fitted encoder
-    print(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
-    
-    
-    # TODO: use the inference function to run the model inferences on the test dataset.
-    #preds = None # your code here
-
-
-    # Calculate and print the metrics
-    #p, r, fb = compute_model_metrics(y_test, preds)
-    #print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}")
-
+    logger.info(hasattr(model, "fit"))  # should be True
+    logger.info(hasattr(model, "predict"))  # should be True
+    logger.info(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
+    logger.info(hasattr(encoder, "categories_"))  # confirms fitted encoder
+    logger.info(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
     
 
-    # TODO: compute the performance on model slices using the performance_on_categorical_slice function
+
     # iterate through the categorical features
     for col in cat_features:
         # iterate through the unique values in one categorical feature
@@ -355,10 +264,7 @@ def main():
         for slicevalue in sorted(holdout_df[col].unique()):
             count = int((holdout_df[col] == slicevalue).sum())
             
-            p, r, fb = performance_on_categorical_slice(
-                # your code here
-                # use test, col and slicevalue as part of the input
-                
+            p, r, fb = performance_on_categorical_slice(                
                 data=holdout_df,
                 column_name=col,
                 slice_value = slicevalue,
@@ -367,7 +273,6 @@ def main():
                 encoder=encoder,
                 label_binarizer=label_binarizer,
                 model=model
-
             )
 
             slice_output_filename = f"{model_name}_slice_output.txt"
@@ -375,8 +280,8 @@ def main():
             slice_output_filepath = save_dir / slice_output_filename
 
             with open(slice_output_filepath, "a") as f:
-                print(f"{col}: {slicevalue}, Count: {count:,}", file=f)
-                print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}", file=f)
+                logger.info(f"{col}: {slicevalue}, Count: {count:,}", file=f)
+                logger.info(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}", file=f)
     
 
 if __name__ == "__main__":

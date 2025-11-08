@@ -2,6 +2,9 @@ from pathlib import Path
 import yaml
 import re
 
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from ml.paths import APP_ROOT, CONFIGS_DIR
 
@@ -63,19 +66,13 @@ def clean_model_name(name: str):
 
 def parse_cfg(cfg):
     
-    #print("Model Config Parameters")
     model_cfg = cfg.get("model", {})
-    #print(model_cfg)
-    #print()
-    
-    #print("Train Config Parameters")
-    train_cfg = cfg.get("train", {})
-    #print(train_cfg)
-    #print()
+    logger.info(f"Model Config Parameters: {model_cfg})
 
-    #print("IO Config Parameters")
+    logger.info(f"Train Config Parameters: {train_cfg}")
+    train_cfg = cfg.get("train", {})
+
+    logger.info(f"IO Config Parameters:" {io_cfg})
     io_cfg = cfg.get("io", {})
-    #print(io_cfg)
-    #print()
 
     return model_cfg, train_cfg, io_cfg

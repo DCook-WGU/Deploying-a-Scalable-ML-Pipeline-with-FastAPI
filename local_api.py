@@ -1,8 +1,10 @@
 import json
-
 import requests
-
 import argparse
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def parse_args():
@@ -30,29 +32,22 @@ def main():
     # Load Config via arguments
     if args.model and args.model.strip():
         model_name = args.model
-        print(f"Model Found: {model_name}")
+        logger.info(f"Model Found: {model_name}")
     else:
         model_name = "random_forest"
-        print(f"No model specified, using default - Random Forest Classifier")
+        logger.info(f"No model specified, using default - Random Forest Classifier")
 
     base_url = "http://127.0.0.1:8000"
 
-    # TODO: send a GET using the URL http://127.0.0.1:8000
-    #r = None # Your code here
     r = requests.get(base_url)
 
-    # TODO: print the status code
-    # print()
-    print(f"Status Code: {r.status_code}")
-
-    # TODO: print the welcome message
-    # print()
+    logger.info(f"Status Code: {r.status_code}")
 
     if r.status_code == 200:
         data = r.json()
-        print(f"Result: {data.get('message')}")
+        logger.info(f"Result: {data.get('message')}")
     else:
-        print("Get Request failed.")
+        logger.info("Get Request failed.")
 
 
     data = {
@@ -72,24 +67,17 @@ def main():
         "native-country": "United-States",
     }
 
-    # TODO: send a POST using the data above
-    #r = None # Your code here
     r = requests.post(f"{base_url}/data/?model={model_name}", json=data)
-
-
-    # TODO: print the status code
-    # print()
-
-    print(f"Status Code: {r.status_code}")
-
-    # TODO: print the result
-    # print()
+    
+    logger.info(f"Status Code: {r.status_code}")
 
     if r.status_code == 200:
         result = r.json()
-        print(f"Result: {result.get('result')}")
+        logger.info(f"Result: {result.get('result')}")
     else:
-        print("Post Request failed.")
+        logger.info("Post Request failed.")
+
+
 
 if __name__ == "__main__":
     main()

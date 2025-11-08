@@ -1,9 +1,12 @@
 import pickle
 import json 
 import importlib 
-import logging
 from typing import Any, Dict, Optional
 from pathlib import Path
+
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 from sklearn.metrics import fbeta_score, precision_score, recall_score
@@ -11,7 +14,6 @@ from ml.data import process_data
 # TODO: add necessary import
 
 from sklearn.ensemble import RandomForestClassifier
-
 from ml.paths import APP_ROOT, DATA_DIR, MODEL_DIR
 
 
@@ -104,8 +106,6 @@ def train_model(X_train, y_train, cfg):
     model
         Trained machine learning model.
     """
-    # TODO: implement the function
-    #pass
 
     model = _build_estimator(cfg)
     model.fit(X_train, y_train)
@@ -158,8 +158,6 @@ def inference(model, X, proba=False, threshold=0.5):
     preds : np.array
         Predictions from the model.
     """
-    # TODO: implement the function
-    #pass
 
     if proba:
         probs = model.predict_proba(X)[:, 1]
@@ -180,8 +178,7 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
     path : str
         Path to save pickle file.
     """
-    # TODO: implement the function
-    #pass
+
 
     io_cfg = (cfg.get("io") or {})
 
@@ -264,8 +261,6 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
 
 def load_model_full(model_name, cfg):
     """ Loads pickle file from `model_name` and returns it."""
-    # TODO: implement the function
-    #pass
 
     io_cfg = cfg.get("io", {})
 
@@ -296,15 +291,15 @@ def load_model_full(model_name, cfg):
     with open(label_binarizer_path, "rb") as f:
         label_binarizer = pickle.load(f)
 
-    print(type(model))
-    print(type(encoder))
-    print(type(label_binarizer))
+    logger.info(type(model))
+    logger.info(type(encoder))
+    logger.info(type(label_binarizer))
 
-    print(hasattr(model, "fit"))  # should be True
-    print(hasattr(model, "predict"))  # should be True
-    print(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
-    print(hasattr(encoder, "categories_"))  # confirms fitted encoder
-    print(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
+    logger.info(hasattr(model, "fit"))  # should be True
+    logger.info(hasattr(model, "predict"))  # should be True
+    logger.info(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
+    logger.info(hasattr(encoder, "categories_"))  # confirms fitted encoder
+    logger.info(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
 
 
     return model, encoder, label_binarizer
@@ -355,12 +350,7 @@ def performance_on_categorical_slice(
     fbeta : float
 
     """
-    # TODO: implement the function
-    #X_slice, y_slice, _, _ = process_data(
-        # your code here
-        # for input data, use data in column given as "column_name", with the slice_value 
-        # use training = False
-    #)
+
 
     df_slice = data[data[column_name] == slice_value]
 
