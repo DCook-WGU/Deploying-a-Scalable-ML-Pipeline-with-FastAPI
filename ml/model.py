@@ -318,11 +318,11 @@ def performance_on_categorical_slice(
 
     X_slice, y_slice, _, _ = process_data(
         df_slice,
-        categorical_features = cat_features,
-        label = train_cfg.get("target"),
+        categorical_features = categorical_features,
+        label = label,
         training = False,
         encoder = encoder,
-        label_binarizer = label_binarizer
+        lb = label_binarizer
     )
 
 

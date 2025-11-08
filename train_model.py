@@ -354,7 +354,12 @@ def main():
                 model=model
 
             )
-            with open("slice_output.txt", "a") as f:
+
+            slice_output_filename = f"{model_name}_slice_output.txt"
+
+            slice_output_filepath = save_dir / slice_output_filename
+
+            with open(slice_output_filepath, "a") as f:
                 print(f"{col}: {slicevalue}, Count: {count:,}", file=f)
                 print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}", file=f)
     
