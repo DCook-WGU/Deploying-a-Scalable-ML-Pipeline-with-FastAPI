@@ -3,6 +3,7 @@ import json
 import importlib 
 import logging
 from typing import Any, Dict, Optional
+from pathlib import Path
 
 
 from sklearn.metrics import fbeta_score, precision_score, recall_score
@@ -11,7 +12,7 @@ from ml.data import process_data
 
 from sklearn.ensemble import RandomForestClassifier
 
-
+from ml.paths import APP_ROOT, DATA_DIR, MODEL_DIR
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
@@ -261,10 +262,58 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-def load_model(path):
-    """ Loads pickle file from `path` and returns it."""
+def load_model_full(model_name, cfg):
+    """ Loads pickle file from `model_name` and returns it."""
     # TODO: implement the function
-    pass
+    #pass
+
+    io_cfg = cfg.get("io", {})
+
+    model_dir = MODEL_DIR
+    model_subdir = io_cfg.get("model_subdir")
+
+    model_subdir_path = Path(model_dir) / model_subdir
+
+    if not model_subdir_path.is_dir() or not model_subdir_path.exists():
+        raise FileNotFoundError(f"Model subdir not found: {model_subdir_path}")
+
+
+    model_path = model_subdir_path / f"{model_name}_model.pkl"
+    encoder_path = model_subdir_path / f"{model_name}_encoder.pkl"
+    label_binarizer_path = model_subdir_path / f"{model_name}_label_binarizer.pkl"
+
+    paths = [model_path, encoder_path, label_binarizer_path]
+    for path in paths:
+        if not path.exists():
+            raise FileNotFoundError(f"Missing Component: {path}")
+        
+    with open(model_path, "rb") as f:
+        model = pickle.load(f)
+
+    with open(encoder_path, "rb") as f:
+        encoder = pickle.load(f)
+
+    with open(label_binarizer_path, "rb") as f:
+        label_binarizer = pickle.load(f)
+
+    print(type(model))
+    print(type(encoder))
+    print(type(label_binarizer))
+
+    print(hasattr(model, "fit"))  # should be True
+    print(hasattr(model, "predict"))  # should be True
+    print(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
+    print(hasattr(encoder, "categories_"))  # confirms fitted encoder
+    print(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
+
+
+    return model, encoder, label_binarizer
+
+
+def load_model(path):
+    with open(path, "rb") as f:
+        return pickle.load(f)
+
 
 
 

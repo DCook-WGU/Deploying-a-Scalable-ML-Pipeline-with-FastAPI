@@ -45,7 +45,7 @@ def discover_models(MODEL_DIR):
         if not model_subdir.is_dir():
             continue
 
-        pickles = list(sub.glob("*.pkl"))
+        pickles = list(model_subdir.glob("*.pkl"))
 
         if not pickles:
             continue
@@ -54,17 +54,17 @@ def discover_models(MODEL_DIR):
 
         for base_filename in base_filenames:
             encoder_file = model_subdir / f"{base_filename}_encoder.pkl"
-            model_File = model_subdir / f"{base_filename}_model.pkl"
+            model_file = model_subdir / f"{base_filename}_model.pkl"
             label_binarizer = model_subdir / f"{base_filename}_label_binarizer.pkl"
 
-            if encoder_file.exists() and mdlmodel_File_file.exists() and label_binarizer.exists():
+            if encoder_file.exists() and model_file.exists() and label_binarizer.exists():
                 found_models[base_filename] = {"model_subdir": model_subdir.name, "base_filename": base_filename}
 
     return found_models
 
 
 available_models = discover_models(MODEL_DIR)
-default_model = "random_forest" if random_forest in available_models else next(iter(available_models))
+default_model = "random_forest" if "random_forest" in available_models else next(iter(available_models))
 
 @lru_cache(maxsize=16)
 def get_model_encoder_label_binarizer(model_key):
@@ -76,7 +76,7 @@ def get_model_encoder_label_binarizer(model_key):
     selected_model = available_models[model_key]    
 
     model_base_path = MODEL_DIR
-    model_subdir_path = base_path / selected_model["model_subdir"]
+    model_subdir_path = model_base_path / selected_model["model_subdir"]
     model_filename = selected_model["base_filename"]
 
     model_filepath = model_subdir_path / f"{model_filename}_model.pkl"
@@ -89,7 +89,7 @@ def get_model_encoder_label_binarizer(model_key):
 
     encoder = load_model(encoder_filepath)
     model = load_model(model_filepath)
-    label_binarizer(label_binarizer_filepath)
+    label_binarizer = load_model(label_binarizer_filepath)
 
     return encoder, model, label_binarizer, model_subdir_path
 
@@ -98,6 +98,8 @@ def get_model_encoder_label_binarizer(model_key):
 
 #path = None # TODO: enter the path for the saved model 
 #model = load_model(path)
+
+
 
 # TODO: create a RESTful API using FastAPI
 #app = None # your code here
@@ -114,7 +116,14 @@ async def startup_event():
 async def get_root():
     """ Say hello!"""
     # your code here
-    pass
+    #pass
+
+    return {
+        "message": "Income classifier is up. POST to /data/?model=<key> with a record to get a prediction.",
+        "models_available": list(available_models.keys()),
+        "default_model": default_model,
+        "model_dir": str(MODEL_DIR),
+    }
 
 
 # TODO: create a POST on a different path that does model inference
@@ -123,7 +132,7 @@ async def post_inference(data: Data,
                          model: str = Query(default_model, description=f"One of: {list(available_models.keys())}")):
 
     try:
-        encoder, model, label_binarizer, model_subdir_path = get_artifacts(model)
+        encoder, model, label_binarizer, model_subdir_path = get_model_encoder_label_binarizer(model)
     except KeyError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except FileNotFoundError as e:
@@ -153,7 +162,7 @@ async def post_inference(data: Data,
         # use training = False
         # do not need to pass lb as input
 
-        df,
+        data,
         categorical_features=cat_features,
         label = None,
         training = False, 

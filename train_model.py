@@ -13,6 +13,7 @@ from ml.model import (
     compute_model_metrics,
     inference,
     load_model,
+    load_model_full,
     performance_on_categorical_slice,
     save_model,
     train_model,
@@ -321,7 +322,21 @@ def main():
 
 
     #model = load_model()
+    
+    
+    model, encoder, label_binarizer = load_model_full(model_name, cfg)
 
+    print(type(model))
+    print(type(encoder))
+    print(type(label_binarizer))
+
+    print(hasattr(model, "fit"))  # should be True
+    print(hasattr(model, "predict"))  # should be True
+    print(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
+    print(hasattr(encoder, "categories_"))  # confirms fitted encoder
+    print(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
+    
+    
     # TODO: use the inference function to run the model inferences on the test dataset.
     #preds = None # your code here
 
