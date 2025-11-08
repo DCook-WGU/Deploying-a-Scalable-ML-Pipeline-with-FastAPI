@@ -1,12 +1,18 @@
 import pickle
+import json 
+import importlib 
+import logging
+from typing import Any, Dict, Optional
+
+
 from sklearn.metrics import fbeta_score, precision_score, recall_score
 from ml.data import process_data
 # TODO: add necessary import
 
 from sklearn.ensemble import RandomForestClassifier
 
-from typing import Any, Dict, Optional
-import importlib
+
+
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
@@ -22,11 +28,16 @@ def _filter_params_for_cls(cls, params: Dict[str, Any]) -> Dict[str, Any]:
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 
-def _build_estimator(cfg: Dict[str, Any] = None, class_path: str, parameters: Dict[str, Any] = None, default_random_state: int = 42):
+def _build_estimator(
+    cfg: Optional[Dict[str, Any]] = None, 
+    class_path: Optional[str] = None, 
+    parameters: Optional[Dict[str, Any]] = None, 
+    default_random_state: int = 42):
 
     if cfg:
         model_cfg = cfg.get("model", {}) or {}
         train_cfg = cfg.get("train", {}) or {}
+
         class_path = class_path or model_cfg.get("class_path")
         parameters = parameters or model_cfg.get("params", {})
         default_random_state = train_cfg.get("random_state", default_random_state)
@@ -96,7 +107,7 @@ def train_model(X_train, y_train, cfg):
     #pass
 
     model = _build_estimator(cfg)
-    model.fit(X_train, Y_train)
+    model.fit(X_train, y_train)
 
     return model
 
@@ -158,7 +169,7 @@ def inference(model, X, proba=False, threshold=0.5):
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
-def save_model(model, encoder, lb, cfg, metrics, parameters, save_dir, model_name):
+def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_dir, model_name):
     """ Serializes model to a file.
 
     Inputs
@@ -171,7 +182,7 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, save_dir, model_nam
     # TODO: implement the function
     #pass
 
-    model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
+    io_cfg = (cfg.get("io") or {})
 
     save_dir = save_dir
 
@@ -198,7 +209,7 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, save_dir, model_nam
     existing_files_list = []
 
     for file in files_to_check_for:
-        if file.exists()
+        if file.exists():
             existing_files_list.append(file)
 
     if existing_files_list and not allow_overwrite :
@@ -229,7 +240,7 @@ def save_model(model, encoder, lb, cfg, metrics, parameters, save_dir, model_nam
     with open(encoder_file_path, "wb") as f:
         pickle.dump(encoder, f, protocol=pickle.HIGHEST_PROTOCOL)
 
-    with open(label_binarizer_file_path_file_path, "wb") as f:
+    with open(label_binarizer_file_path, "wb") as f:
         pickle.dump(label_binarizer, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     with open(metrics_file_path, "w", encoding="utf-8") as f:
@@ -260,7 +271,7 @@ def load_model(path):
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 def performance_on_categorical_slice(
-    data, column_name, slice_value, categorical_features, label, encoder, lb, model
+    data, column_name, slice_value, categorical_features, label, encoder, label_binarizer, model
 ):
     """ Computes the model metrics on a slice of the data specified by a column name and
 
@@ -296,14 +307,31 @@ def performance_on_categorical_slice(
 
     """
     # TODO: implement the function
-    X_slice, y_slice, _, _ = process_data(
+    #X_slice, y_slice, _, _ = process_data(
         # your code here
         # for input data, use data in column given as "column_name", with the slice_value 
         # use training = False
+    #)
+
+    X_slice, y_slice, _, _ = process_data(
+        data,
+        categorical_features = cat_features,
+        label = train_cfg.get("target"),
+        training = False,
+        encoder = encoder,
+        label_binarizer = label_binarizer
     )
-    preds = None # your code here to get prediction on X_slice using the inference function
-    precision, recall, fbeta = compute_model_metrics(y_slice, preds)
-    return precision, recall, fbeta
+
+
+    #preds = None # your code here to get prediction on X_slice using the inference function
+    slice_preds = inference(model, X_slice)
+
+    #precision, recall, fbeta = compute_model_metrics(y_slice, preds)
+    slice_precision, slice_recall, slice_fbeta = compute_model_metrics(y_slice, slice_preds)
+
+
+    #return precision, recall, fbeta
+    return slice_precision, slice_recall, slice_fbeta 
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 

@@ -3,8 +3,9 @@ import os
 from pathlib import Path
 import logging
 
-
+import numpy as np
 import pandas as pd
+
 from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
 
 from ml.data import process_data
@@ -188,15 +189,15 @@ def main():
         model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
 
         fold_metrics = []
-        
-        skf = StratifiedKFold(n_splits=train.get("cv_folds"), shuffle=True, random_state=train_cfg.get("random_state"))
+
+        skf = StratifiedKFold(n_splits=train_cfg.get("cv_folds"), shuffle=True, random_state=train_cfg.get("random_state"))
 
         for fold, (train_idx, val_idx) in enumerate(skf.split(data, data[train_cfg.get("target")]), 1):
 
             train_df = data.iloc[train_idx]
             val_df = data.iloc[val_idx]
 
-            X_train, y_train, encoder, lb = process_data(
+            X_train, y_train, encoder, label_binarizer = process_data(
                 train_df,
                 categorical_features=cat_features,
                 label=train_cfg.get("target"),
@@ -209,20 +210,27 @@ def main():
                 label=train_cfg.get("target"),
                 training = False,
                 encoder = encoder,
-                lb = lb
+                lb = label_binarizer
             )
 
             model = train_model(X_train, y_train, cfg=cfg)
 
-            preds = inference(model, X_test, proba=False)
+            preds = inference(model, X_val, proba=False)
 
             precision, recall, fbeta = compute_model_metrics(y_val, preds)
+
+            print(f"Precision: {precision:.4f} | Recall: {recall:.4f} | Fβ: {fbeta:.4f}")
 
             fold_metrics.append((precision, recall, fbeta))
 
         fold_metrics = np.array(fold_metrics)
-
+        
         mean_precision, mean_recall, mean_fbeta = np.mean(fold_metrics, axis=0)
+
+        print("\n=== Cross-validation Summary ===")
+        print(f"Mean Precision: {mean_precision:.4f}")
+        print(f"Mean Recall:    {mean_recall:.4f}")
+        print(f"Mean Fβ:        {mean_fbeta:.4f}")
 
         return mean_precision, mean_recall, mean_fbeta 
 
@@ -231,7 +239,7 @@ def main():
     
 
 
-    X_full, y_full, encoder, lb = process_data(
+    X_full, y_full, encoder, label_binarizer = process_data(
         data,
         categorical_features = cat_features,
         label = train_cfg.get("target"),
@@ -240,13 +248,13 @@ def main():
 
     model = train_model(X_full, y_full, cfg=cfg)
 
-    predictions_full = inference(model, x_full, proba=False)
+    predictions_full = inference(model, X_full, proba=False)
 
     precision_full, recall_full, fbeta_full = compute_model_metrics(y_full, predictions_full)
 
-    final_meterics = {"precision": float(precision_full), "recall": float(recall_full), "fbeta": float(fbeta_full)}
+    final_metrics = {"precision": float(precision_full), "recall": float(recall_full), "fbeta": float(fbeta_full)}
 
-    print(final_meterics)
+    print(final_metrics)
 
     params = model_cfg.get("params")
     
@@ -254,7 +262,7 @@ def main():
     save_model(
         model=model,
         encoder=encoder,
-        lb=lb,
+        label_binarizer=label_binarizer,
         cfg=cfg,
         metrics=final_metrics,
         parameters=params,
@@ -316,10 +324,10 @@ def main():
     # TODO: use the inference function to run the model inferences on the test dataset.
     #preds = None # your code here
 
-    '''
+
     # Calculate and print the metrics
-    p, r, fb = compute_model_metrics(y_test, preds)
-    print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}")
+    #p, r, fb = compute_model_metrics(y_test, preds)
+    #print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}")
 
     # TODO: compute the performance on model slices using the performance_on_categorical_slice function
     # iterate through the categorical features
@@ -335,7 +343,6 @@ def main():
                 print(f"{col}: {slicevalue}, Count: {count:,}", file=f)
                 print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}", file=f)
     
-    '''
 
 if __name__ == "__main__":
     main()
