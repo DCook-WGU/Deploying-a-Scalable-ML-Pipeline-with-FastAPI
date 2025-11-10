@@ -178,3 +178,4 @@ fastapi/
 
 # End of https://www.toptal.com/developers/gitignore/api/python
 /data
+/models
