@@ -1,4 +1,3 @@
-import json
 import requests
 import argparse
 
@@ -15,7 +14,7 @@ def parse_args():
 
     # Configs
     parser.add_argument(
-        "-m", 
+        "-m",
         "--model",
         required=False,
         help="Selected Model",
@@ -49,7 +48,6 @@ def main():
     else:
         logger.info("Get Request failed.")
 
-
     data = {
         "age": 37,
         "workclass": "Private",
@@ -68,7 +66,7 @@ def main():
     }
 
     r = requests.post(f"{base_url}/data/?model={model_name}", json=data)
-    
+
     logger.info(f"Status Code: {r.status_code}")
 
     if r.status_code == 200:
@@ -76,8 +74,6 @@ def main():
         logger.info(f"Result: {result.get('result')}")
     else:
         logger.info("Post Request failed.")
-
-
 
 if __name__ == "__main__":
     main()
