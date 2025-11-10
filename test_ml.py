@@ -160,8 +160,8 @@ def test_column_types(load_data):
     expected_types = {
         "age": "int64",
         "education-num": "int64",
-        "captial-gain": "int64",
-        "captial-loss": "int64",
+        "capital-gain": "int64",
+        "capital-loss": "int64",
         "hours-per-week": "int64",
         }
 
