@@ -67,12 +67,12 @@ def clean_model_name(name: str):
 def parse_cfg(cfg):
     
     model_cfg = cfg.get("model", {})
-    logger.info(f"Model Config Parameters: {model_cfg})
+    logger.info(f"Model Config Parameters: {model_cfg}")
 
-    logger.info(f"Train Config Parameters: {train_cfg}")
     train_cfg = cfg.get("train", {})
+    logger.info(f"Train Config Parameters: {train_cfg}")
 
-    logger.info(f"IO Config Parameters:" {io_cfg})
     io_cfg = cfg.get("io", {})
+    logger.info(f"IO Config Parameters: {io_cfg}")
 
     return model_cfg, train_cfg, io_cfg

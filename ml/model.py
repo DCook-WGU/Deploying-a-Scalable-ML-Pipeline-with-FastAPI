@@ -14,7 +14,7 @@ from ml.data import process_data
 # TODO: add necessary import
 
 from sklearn.ensemble import RandomForestClassifier
-from ml.paths import APP_ROOT, DATA_DIR, MODEL_DIR
+from ml.paths import APP_ROOT, DATA_DIR, MODELS_DIR
 
 
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
@@ -62,7 +62,7 @@ def _build_estimator(
             cls(random_state=default_random_state)
             parameters["random_state"] = default_random_state
         except TypeError:
-            Pass
+            pass
 
     parameters = _filter_params_for_cls(cls, parameters)
 
@@ -90,7 +90,7 @@ def _add_suffixes(cfg):
 
 
 
-# Optional: implement hyperparameter tuning.
+
 def train_model(X_train, y_train, cfg):
     """
     Trains a machine learning model and returns it.
@@ -101,6 +101,8 @@ def train_model(X_train, y_train, cfg):
         Training data.
     y_train : np.array
         Labels.
+    cfg : config file
+
     Returns
     -------
     model
@@ -153,6 +155,10 @@ def inference(model, X, proba=False, threshold=0.5):
         Trained machine learning model.
     X : np.array
         Data used for prediction.
+    proba : bool
+        Boolean Flag to use the predict probability function, .predict_proba(), insted of Predict function, .predict()
+    threshold : Float
+        Float value for the threshold value acceptable
     Returns
     -------
     preds : np.array
@@ -175,9 +181,24 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
     ------
     model
         Trained machine learning model or OneHotEncoder.
-    path : str
-        Path to save pickle file.
+    encoder
+        Trained machine learning model's encoder 
+    label_binarizer
+        Trained machine learning model's label binarizer 
+    cfg
+        config file
+    metrics
+        metrics file
+    parameters
+        parameters file
+    save_dir
+        Path to save directory.
+
+    model_name 
+        model name
+        
     """
+
 
 
     io_cfg = (cfg.get("io") or {})
@@ -260,14 +281,31 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
 #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 def load_model_full(model_name, cfg):
-    """ Loads pickle file from `model_name` and returns it."""
+    """ Loads pickle file from `model_name` and returns it.
+    
+    Inputs
+    ------
+    model_name
+
+    cfg
+
+    Returns:
+    ------
+    model
+    
+    encoder
+    
+    label_binarizer
+
+
+    """
 
     io_cfg = cfg.get("io", {})
 
-    model_dir = MODEL_DIR
+    #MODELS_DIR = MODELS_DIR
     model_subdir = io_cfg.get("model_subdir")
 
-    model_subdir_path = Path(model_dir) / model_subdir
+    model_subdir_path = Path(MODELS_DIR) / model_subdir
 
     if not model_subdir_path.is_dir() or not model_subdir_path.exists():
         raise FileNotFoundError(f"Model subdir not found: {model_subdir_path}")

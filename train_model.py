@@ -23,7 +23,7 @@ from ml.model import (
 )
 
 from ml.config import load_config, get_model_name_from_cfg, parse_cfg
-from ml.paths import APP_ROOT, DATA_DIR, MODEL_DIR
+from ml.paths import APP_ROOT, DATA_DIR, MODELS_DIR
 
 
 def parse_args():
@@ -92,13 +92,13 @@ def resolve_model_path(cfg):
     # Default model name
     model_name = io_cfg.get("model_name") or get_model_name_from_cfg(cfg)
 
-    # If a subdirectory is specified, use it — otherwise, save directly under MODEL_DIR/model_name
+    # If a subdirectory is specified, use it — otherwise, save directly under MODELS_DIR/model_name
     model_subdir = io_cfg.get("model_subdir")
 
     if model_subdir:
-        save_dir = (MODEL_DIR / model_subdir).resolve()
+        save_dir = (MODELS_DIR / model_subdir).resolve()
     else:
-        save_dir = (MODEL_DIR / model_name).resolve()
+        save_dir = (MODELS_DIR / model_name).resolve()
 
     save_dir.mkdir(parents=True, exist_ok=True)
 
@@ -279,9 +279,12 @@ def main():
 
             slice_output_filepath = save_dir / slice_output_filename
 
+            logger.info(f"Printing to output file: {col}: {slicevalue}, Count: {count:,}")
+            logger.info(f" Printing to output file: Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}")
+
             with open(slice_output_filepath, "a") as f:
-                logger.info(f"{col}: {slicevalue}, Count: {count:,}", file=f)
-                logger.info(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}", file=f)
+                print(f"{col}: {slicevalue}, Count: {count:,}", file=f)
+                print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}", file=f)
     
 
 if __name__ == "__main__":

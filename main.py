@@ -15,7 +15,7 @@ from ml.data import apply_label, process_data
 from ml.model import inference, load_model
 
 
-from ml.paths import MODEL_DIR, DATA_DIR, CONFIGS_DIR, APP_ROOT
+from ml.paths import MODELS_DIR, DATA_DIR, CONFIGS_DIR, APP_ROOT
 
 
 # DO NOT MODIFY
@@ -38,14 +38,14 @@ class Data(BaseModel):
     native_country: str = Field(..., example="United-States", alias="native-country")
 
 
-def discover_models(MODEL_DIR):
+def discover_models(MODELS_DIR):
 
     found_models = {}
 
-    if not MODEL_DIR.exists():
+    if not MODELS_DIR.exists():
         return found_models
     
-    for model_subdir in MODEL_DIR.iterdir():
+    for model_subdir in MODELS_DIR.iterdir():
 
         if not model_subdir.is_dir():
             continue
@@ -68,7 +68,7 @@ def discover_models(MODEL_DIR):
     return found_models
 
 
-available_models = discover_models(MODEL_DIR)
+available_models = discover_models(MODELS_DIR)
 default_model = "random_forest" if "random_forest" in available_models else next(iter(available_models))
 
 @lru_cache(maxsize=16)
@@ -80,7 +80,7 @@ def get_model_encoder_label_binarizer(model_key):
 
     selected_model = available_models[model_key]    
 
-    model_base_path = MODEL_DIR
+    model_base_path = MODELS_DIR
     model_subdir_path = model_base_path / selected_model["model_subdir"]
     model_filename = selected_model["base_filename"]
 
@@ -110,14 +110,12 @@ async def startup_event():
 @app.get("/")
 async def get_root():
     """ Say hello!"""
-    # your code here
-    #pass
 
     return {
         "message": "Income classifier is up. POST to /data/?model=<key> with a record to get a prediction.",
         "models_available": list(available_models.keys()),
         "default_model": default_model,
-        "model_dir": str(MODEL_DIR),
+        "model_dir": str(MODELS_DIR),
     }
 
 
