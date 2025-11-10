@@ -6,6 +6,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def _load_yaml(path: str | Path):
     path = Path(path).resolve()
 
@@ -14,6 +15,7 @@ def _load_yaml(path: str | Path):
 
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
+
 
 def load_config(config_path: str | Path):
     """
@@ -37,6 +39,7 @@ def load_config(config_path: str | Path):
 
     return cfg
 
+
 def get_model_name_from_cfg(cfg: str):
     """Return a filesystem-safe model name derived from class_path in config."""
 
@@ -58,7 +61,7 @@ def clean_model_name(name: str):
 
 
 def parse_cfg(cfg):
-    
+
     model_cfg = cfg.get("model", {})
     logger.info(f"Model Config Parameters: {model_cfg}")
 

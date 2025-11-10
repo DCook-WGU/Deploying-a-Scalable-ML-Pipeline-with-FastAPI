@@ -1,7 +1,6 @@
 import pandas as pd
 import logging
 from functools import lru_cache
-from typing import Dict, Tuple
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel, Field
 from ml.data import apply_label, process_data
@@ -49,7 +48,8 @@ def discover_models(MODELS_DIR):
         if not pickles:
             continue
 
-        base_filenames = {p.stem.replace("_encoder", "").replace("_model", "").replace("_label_binarizer", "") for p in pickles}
+        base_filenames = {p.stem.replace("_encoder", "").replace("_model", "")
+        .replace("_label_binarizer", "") for p in pickles}
 
         for base_filename in base_filenames:
             encoder_file = model_subdir / f"{base_filename}_encoder.pkl"
@@ -72,7 +72,7 @@ def get_model_encoder_label_binarizer(model_key):
     if model_key not in available_models:
         raise KeyError(f"Model, {model_key}, not available. Available models are: {list(available_models)}")
 
-    selected_model = available_models[model_key] 
+    selected_model = available_models[model_key]
 
     model_base_path = MODELS_DIR
     model_subdir_path = model_base_path / selected_model["model_subdir"]
@@ -90,6 +90,7 @@ def get_model_encoder_label_binarizer(model_key):
     label_binarizer = load_model(label_binarizer_filepath)
 
     return encoder, model, label_binarizer, model_subdir_path
+
 
 app = FastAPI()
 
