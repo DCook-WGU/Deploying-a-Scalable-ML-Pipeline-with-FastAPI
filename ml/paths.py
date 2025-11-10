@@ -24,9 +24,6 @@ DOCS_DIR = APP_ROOT / "docs"
 DEFAULT_MODEL_SUBDIR = "random_forest"
 DEFAULT_MODEL_DIR = MODELS_DIR / DEFAULT_MODEL_SUBDIR
 
-
-
-# 
 def ensure_directories() -> None:
     """Create all common directories if missing."""
 

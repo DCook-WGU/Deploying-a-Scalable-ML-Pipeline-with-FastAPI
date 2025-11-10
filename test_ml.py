@@ -1,14 +1,10 @@
 import pytest
-
 import os
 import pandas as pd
 from pathlib import Path
 
 
-
 APP_ROOT = Path(__file__).resolve().parents[1]
-
-
 
 
 @pytest.fixture(scope="session")
@@ -17,22 +13,22 @@ def load_data():
     Fixture returning a DataFrame from data_path.
     If the CSV is missing or empty, returns a small synthetic DataFrame.
     """
-    
+
     env_path = os.getenv("DATA_PATH", "data/census.csv")
     data_path = (APP_ROOT / env_path).resolve()
 
-    dataframe = None 
+    dataframe = None
 
     if data_path.exists():
-        try: 
+        try:
             dataframe = pd.read_csv(data_path)
         except Exception:
-            dataframe = None 
-    
+            dataframe = None
+
 
     if dataframe is not None and not dataframe.empty:
         return dataframe
-    
+
     return pd.DataFrame(
         {
             "id": [1, 2, 3, 4],
@@ -41,6 +37,7 @@ def load_data():
             "name": ["a", "b", "c", "d"],
         }
     )
+
 
 def test_one_read_write_access(tmp_path, load_data):
     """
@@ -60,7 +57,7 @@ def test_one_read_write_access(tmp_path, load_data):
 
     # Verify Shape
     assert len(dataframe2) == len(load_data)
-    
+
     # Deep Testing
     # https://pandas.pydata.org/docs/reference/testing.html
     # https://pandas.pydata.org/docs/reference/api/pandas.testing.assert_frame_equal.html#pandas.testing.assert_frame_equal
@@ -69,6 +66,7 @@ def test_one_read_write_access(tmp_path, load_data):
         load_data.reset_index(drop=True),
         check_dtype=False
     )
+
 
 # TODO: implement the second test. Change the function name and input as needed
 def test_two_columns_exists(load_data):
@@ -96,7 +94,7 @@ def test_two_columns_exists(load_data):
     }
 
     actual_cols = set(load_data.columns)
-    
+
     missing = expected_cols - actual_cols
     extras = actual_cols - expected_cols
 
@@ -119,4 +117,3 @@ def test_three_model_directory_and_files_exists():
 
     models = list(models_dir.rglob("*.pkl"))
     assert models, "models/ exists but no model artifacts found."
-

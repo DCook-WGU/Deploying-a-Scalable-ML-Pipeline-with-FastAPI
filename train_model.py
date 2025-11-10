@@ -15,7 +15,6 @@ from ml.data import process_data
 from ml.model import (
     compute_model_metrics,
     inference,
-    load_model,
     load_model_full,
     performance_on_categorical_slice,
     save_model,
@@ -34,7 +33,7 @@ def parse_args():
 
     # Configs
     parser.add_argument(
-        "-c", 
+        "-c",
         "--config",
         required=False,
         help="Path to the YAML configuration file (e.g. configs/random_forest.yaml)",
@@ -42,15 +41,15 @@ def parse_args():
 
      # Data Files
     parser.add_argument(
-        "--data-dir", 
+        "--data-dir",
         help="Override io.data_dir"
     )
     parser.add_argument(
-        "--data-file", 
+        "--data-file",
         help="Override io.data_file"
     )
     parser.add_argument(
-        "--data-path", 
+        "--data-path",
         help="Direct file path (bypass data_dir/data_file)"
     )
 
@@ -83,7 +82,6 @@ def load_data(cfg):
     data = pd.read_csv(data_file_path)
 
     return data
-
 
 
 def resolve_model_path(cfg):
@@ -119,28 +117,25 @@ def main():
         logger.info(f"Configuration Found and Loaded: {cfg}")
     else:
         cfg = load_config("configs/random_forest.yaml")
-        logger.info(f"No configuration file was provided, using default - Random Forest Classifier")
+        logger.info("No configuration file was provided, using default - Random Forest Classifier")
 
     cfg = apply_cli_overrides(cfg, args)
 
     model_cfg, train_cfg, io_cfg = parse_cfg(cfg)
-    
+
     logger.info(model_cfg)
     logger.info(train_cfg)
     logger.info(io_cfg)
 
-
     save_dir, model_name = resolve_model_path(cfg)
-    
+
     logger.info(f"Save directory: {save_dir}")
     logger.info(f"Model Name: {model_name}")
-
 
     data = load_data(cfg)
 
     data.head()
     data.info()
-
 
     # DO NOT MODIFY
     cat_features = [
@@ -154,8 +149,8 @@ def main():
         "native-country",
     ]
 
-    train_df, holdout_df = train_test_split(data, test_size=train_cfg.get("holdout_size"), stratify=data[train_cfg.get("target")], random_state=train_cfg.get("random_state"))
-
+    train_df, holdout_df = train_test_split(data, test_size=train_cfg.get("holdout_size"), \
+        stratify=data[train_cfg.get("target")], random_state=train_cfg.get("random_state"))
 
 
     def data_split_kfold(data, cfg):
@@ -175,16 +170,16 @@ def main():
                 train_df,
                 categorical_features=cat_features,
                 label=train_cfg.get("target"),
-                training = True
+                training=True
             )
 
             X_val, y_val, _, _ = process_data(
                 val_df,
                 categorical_features=cat_features,
                 label=train_cfg.get("target"),
-                training = False,
-                encoder = encoder,
-                lb = label_binarizer
+                training=False,
+                encoder=encoder,
+                lb=label_binarizer
             )
 
             model = train_model(X_train, y_train, cfg=cfg)
@@ -206,17 +201,15 @@ def main():
         logger.info(f"Mean Recall:    {mean_recall:.4f}")
         logger.info(f"Mean Fβ:        {mean_fbeta:.4f}")
 
-        return mean_precision, mean_recall, mean_fbeta 
-
+        return mean_precision, mean_recall, mean_fbeta
 
     mean_precision, mean_recall, mean_fbeta = data_split_kfold(train_df, cfg)
-    
 
     X_full, y_full, encoder, label_binarizer = process_data(
         train_df,
-        categorical_features = cat_features,
-        label = train_cfg.get("target"),
-        training = True
+        categorical_features=cat_features,
+        label=train_cfg.get("target"),
+        training=True
     )
 
     model = train_model(X_full, y_full, cfg=cfg)
@@ -229,8 +222,7 @@ def main():
 
     logger.info(final_metrics)
 
-    params = model_cfg.get("params")
-    
+    params=model_cfg.get("params")
 
     save_model(
         model=model,
@@ -240,8 +232,8 @@ def main():
         metrics=final_metrics,
         parameters=params,
         save_dir=save_dir,
-        model_name = model_name
-)
+        model_name=model_name
+    )
 
     model, encoder, label_binarizer = load_model_full(model_name, cfg)
 
@@ -254,20 +246,19 @@ def main():
     logger.info(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
     logger.info(hasattr(encoder, "categories_"))  # confirms fitted encoder
     logger.info(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
-    
 
 
     # iterate through the categorical features
     for col in cat_features:
         # iterate through the unique values in one categorical feature
-        #for slicevalue in sorted(test[col].unique()):
+        # for slicevalue in sorted(test[col].unique()):
         for slicevalue in sorted(holdout_df[col].unique()):
             count = int((holdout_df[col] == slicevalue).sum())
-            
-            p, r, fb = performance_on_categorical_slice(                
+
+            p, r, fb = performance_on_categorical_slice(
                 data=holdout_df,
                 column_name=col,
-                slice_value = slicevalue,
+                slice_value=slicevalue,
                 categorical_features=cat_features,
                 label=train_cfg.get("target"),
                 encoder=encoder,
@@ -285,7 +276,7 @@ def main():
             with open(slice_output_filepath, "a") as f:
                 print(f"{col}: {slicevalue}, Count: {count:,}", file=f)
                 print(f"Precision: {p:.4f} | Recall: {r:.4f} | F1: {fb:.4f}", file=f)
-    
+
 
 if __name__ == "__main__":
     main()

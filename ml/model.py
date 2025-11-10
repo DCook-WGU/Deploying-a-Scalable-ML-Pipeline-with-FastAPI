@@ -1,34 +1,25 @@
 import pickle
-import json 
-import importlib 
-from typing import Any, Dict, Optional
-from pathlib import Path
-
+import json
+import importlib
 import logging
+from pathlib import Path
+from typing import Any, Dict, Optional
+from sklearn.metrics import fbeta_score, precision_score, recall_score
+from ml.data import process_data
+from ml.paths import MODELS_DIR
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-from sklearn.metrics import fbeta_score, precision_score, recall_score
-from ml.data import process_data
-# TODO: add necessary import
-
-from sklearn.ensemble import RandomForestClassifier
-from ml.paths import APP_ROOT, DATA_DIR, MODELS_DIR
-
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
 def _filter_params_for_cls(cls, params: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
-        inst = cls()  
+        inst = cls()
         valid = set(getattr(inst, "get_params")().keys())
         return {key: value for key, value in params.items() if key in valid}
     except Exception:
-        return params  
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
+        return params
 
 
 def _build_estimator(
@@ -69,10 +60,6 @@ def _build_estimator(
     return cls(**parameters)
 
 
-
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
 def _add_suffixes(cfg):
 
     defaults = {
@@ -84,11 +71,6 @@ def _add_suffixes(cfg):
     }
 
     return {**defaults, **(cfg.get("io", {}).get("file_name_suffixes", {}) )}
-
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
-
 
 
 def train_model(X_train, y_train, cfg):
@@ -115,11 +97,6 @@ def train_model(X_train, y_train, cfg):
     return model
 
 
-
-
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
 def compute_model_metrics(y, preds):
     """
     Validates the trained machine learning model using precision, recall, and F1.
@@ -143,8 +120,6 @@ def compute_model_metrics(y, preds):
 
     return precision, recall, fbeta
 
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 def inference(model, X, proba=False, threshold=0.5):
     """ Run model inferences and return the predictions.
@@ -172,8 +147,6 @@ def inference(model, X, proba=False, threshold=0.5):
         return model.predict(X)
 
 
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
 def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_dir, model_name):
     """ Serializes model to a file.
 
@@ -198,8 +171,6 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
         model name
         
     """
-
-
 
     io_cfg = (cfg.get("io") or {})
 
@@ -250,9 +221,6 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
                               "Either change overwrite protection in _base.yaml from io.allow_overwrite: true or select a different name for save"
         )
 
-
-
-
     with open(model_file_path, "wb") as f:
         pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
 
@@ -277,8 +245,6 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
         "save_dir": save_dir,
     }
 
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
 
 def load_model_full(model_name, cfg):
     """ Loads pickle file from `model_name` and returns it.
@@ -348,10 +314,6 @@ def load_model(path):
         return pickle.load(f)
 
 
-
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
 def performance_on_categorical_slice(
     data, column_name, slice_value, categorical_features, label, encoder, label_binarizer, model
 ):
@@ -389,9 +351,7 @@ def performance_on_categorical_slice(
 
     """
 
-
     df_slice = data[data[column_name] == slice_value]
-
 
     X_slice, y_slice, _, _ = process_data(
         df_slice,
@@ -402,7 +362,6 @@ def performance_on_categorical_slice(
         lb = label_binarizer
     )
 
-
     #preds = None # your code here to get prediction on X_slice using the inference function
     slice_predictions = inference(model, X_slice)
 
@@ -412,10 +371,3 @@ def performance_on_categorical_slice(
 
     #return precision, recall, fbeta
     return slice_precision, slice_recall, slice_fbeta 
-
-
-#### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### #### 
-
-
-
-
