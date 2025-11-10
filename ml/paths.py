@@ -37,6 +37,7 @@ def ensure_directories() -> None:
     ]:
         directory.mkdir(parents=True, exist_ok=True)
 
+
 # Runs once on import to verify all directories are there and created.
 ensure_directories()
 

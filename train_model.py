@@ -19,6 +19,7 @@ from ml.paths import DATA_DIR, MODELS_DIR
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 def parse_args():
 
     parser = argparse.ArgumentParser(
@@ -55,11 +56,11 @@ def apply_cli_overrides(cfg, args):
     io_cfg = cfg.setdefault("io", {})
 
     # Data Files
-    if args.data_dir: 
+    if args.data_dir:
         io_cfg["data_dir"] = args.data_dir
-    if args.data_file: 
+    if args.data_file:
         io_cfg["data_file"] = args.data_file
-    if args.data_path: 
+    if args.data_path:
         io_cfg["data_path"] = args.data_path
 
     return cfg
@@ -146,8 +147,8 @@ def main():
         "native-country",
     ]
 
-    train_df, holdout_df = train_test_split(data, test_size=train_cfg.get("holdout_size"), 
-                                            stratify=data[train_cfg.get("target")], 
+    train_df, holdout_df = train_test_split(data, test_size=train_cfg.get("holdout_size"),
+                                            stratify=data[train_cfg.get("target")],
                                             random_state=train_cfg.get("random_state"))
 
     def data_split_kfold(data, cfg):

@@ -23,11 +23,11 @@ def _filter_params_for_cls(cls, params: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _build_estimator(
-    cfg: Optional[Dict[str, Any]] = None,
-    class_path: Optional[str] = None,
-    parameters: Optional[Dict[str, Any]] = None,
-    default_random_state: int = 42
-    ):
+                        cfg: Optional[Dict[str, Any]] = None,
+                        class_path: Optional[str] = None,
+                        parameters: Optional[Dict[str, Any]] = None,
+                        default_random_state: int = 42
+                    ):
 
     if cfg:
         model_cfg = cfg.get("model", {}) or {}
@@ -178,7 +178,7 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
     base_filename = model_name or io_cfg.get("model_name", "model")
 
     suffixes = (io_cfg.get("file_name_suffixes") or {})
-    
+
     suffix_model = suffixes.get("model", "_model.pkl")
     suffix_encoder = suffixes.get("encoder", "_encoder.pkl")
     suffix_label_binarizer = suffixes.get("label_binarizer", "_label_binarizer.pkl")
@@ -193,8 +193,8 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
 
     allow_overwrite = bool(io_cfg.get("allow_overwrite", True))
 
-    files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path, 
-        metrics_file_path, parameters_file_path]
+    files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path,
+                            metrics_file_path, parameters_file_path]
 
     existing_files_list = []
 
@@ -220,7 +220,7 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
                               f"- {existing_files_list_str}\n"
                               "Either change overwrite protection in _base.yaml from io.allow_overwrite: \
                               true or select a different name for save"
-                            )   
+                            )
 
     with open(model_file_path, "wb") as f:
         pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -249,7 +249,7 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
 
 def load_model_full(model_name, cfg):
     """ Loads pickle file from `model_name` and returns it.
-    
+
     Inputs
     ------
     model_name
@@ -301,9 +301,11 @@ def load_model_full(model_name, cfg):
 
     return model, encoder, label_binarizer
 
+
 def load_model(path):
     with open(path, "rb") as f:
         return pickle.load(f)
+
 
 def performance_on_categorical_slice(
     data, column_name, slice_value, categorical_features, label, encoder, label_binarizer, model
