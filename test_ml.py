@@ -30,10 +30,21 @@ def load_data():
 
     return pd.DataFrame(
         {
-            "id": [1, 2, 3, 4],
             "age": [25, 41, 73, 19],
-            "salary": [55000.0, 92000.0, 37500.0, 78000.0],
-            "name": ["a", "b", "c", "d"],
+            "workclass": ["Private", "Self-emp-not-inc", "Private", "Private"],
+            "fnlgt": [226802, 89814, 336951, 160187],
+            "education": ["11th", "HS-grad", "Masters", "Some-college"],
+            "education-num": [7, 9, 14, 10],
+            "marital-status": ["Never-married", "Married-civ-spouse", "Divorced", "Never-married"],
+            "occupation": ["Machine-op-inspct", "Farming-fishing", "Prof-specialty", "Other-service"],
+            "relationship": ["Own-child", "Husband", "Not-in-family", "Unmarried"],
+            "race": ["Black", "White", "White", "Black"],
+            "sex": ["Male", "Male", "Female", "Female"],
+            "capital-gain": [0, 0, 14084, 0],
+            "capital-loss": [0, 0, 0, 0],
+            "hours-per-week": [40, 50, 60, 20],
+            "native-country": ["United-States"] * 4,
+            "salary": ["<=50K", ">50K", "<=50K", "<=50K"],
         }
     )
 
