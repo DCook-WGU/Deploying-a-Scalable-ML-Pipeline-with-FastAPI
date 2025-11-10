@@ -1,21 +1,15 @@
+import pandas as pd
 import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-
-import os
 from functools import lru_cache
 from typing import Dict, Tuple
-
-import pandas as pd
 from fastapi import FastAPI, Query, HTTPException
 from pydantic import BaseModel, Field
-
 from ml.data import apply_label, process_data
 from ml.model import inference, load_model
+from ml.paths import MODELS_DIR
 
-
-from ml.paths import MODELS_DIR, DATA_DIR, CONFIGS_DIR, APP_ROOT
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 # DO NOT MODIFY
@@ -44,7 +38,7 @@ def discover_models(MODELS_DIR):
 
     if not MODELS_DIR.exists():
         return found_models
-    
+
     for model_subdir in MODELS_DIR.iterdir():
 
         if not model_subdir.is_dir():
@@ -54,8 +48,8 @@ def discover_models(MODELS_DIR):
 
         if not pickles:
             continue
-        
-        base_filenames = {p.stem.replace("_encoder", "").replace("_model","").replace("_label_binarizer","") for p in pickles}
+
+        base_filenames = {p.stem.replace("_encoder", "").replace("_model", "").replace("_label_binarizer", "") for p in pickles}
 
         for base_filename in base_filenames:
             encoder_file = model_subdir / f"{base_filename}_encoder.pkl"
@@ -71,14 +65,14 @@ def discover_models(MODELS_DIR):
 available_models = discover_models(MODELS_DIR)
 default_model = "random_forest" if "random_forest" in available_models else next(iter(available_models))
 
+
 @lru_cache(maxsize=16)
 def get_model_encoder_label_binarizer(model_key):
 
     if model_key not in available_models:
         raise KeyError(f"Model, {model_key}, not available. Available models are: {list(available_models)}")
 
-
-    selected_model = available_models[model_key]    
+    selected_model = available_models[model_key] 
 
     model_base_path = MODELS_DIR
     model_subdir_path = model_base_path / selected_model["model_subdir"]
@@ -87,7 +81,6 @@ def get_model_encoder_label_binarizer(model_key):
     model_filepath = model_subdir_path / f"{model_filename}_model.pkl"
     encoder_filepath = model_subdir_path / f"{model_filename}_encoder.pkl"
     label_binarizer_filepath = model_subdir_path / f"{model_filename}_label_binarizer.pkl"
-
 
     if not model_filepath.exists() or not encoder_filepath.exists() or not label_binarizer_filepath.exists():
         raise FileNotFoundError(f"Missing model components in {model_subdir_path}")
@@ -99,6 +92,7 @@ def get_model_encoder_label_binarizer(model_key):
     return encoder, model, label_binarizer, model_subdir_path
 
 app = FastAPI()
+
 
 # Adding startup to print a list of available models
 @app.on_event("startup")
@@ -152,10 +146,9 @@ async def post_inference(data: Data,
     data_processed, _, _, _ = process_data(
         data,
         categorical_features=cat_features,
-        label = None,
-        training = False, 
-        encoder = encoder,
-        #lb = label_binarizer
+        label=None,
+        training=False,
+        encoder=encoder,
     )
 
     _inference = inference(model, data_processed)

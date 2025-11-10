@@ -1,24 +1,19 @@
 from pathlib import Path
 import yaml
 import re
-
 import logging
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-from ml.paths import APP_ROOT, CONFIGS_DIR
-
-
 def _load_yaml(path: str | Path):
     path = Path(path).resolve()
-    
+
     if path.is_dir():
         raise IsADirectoryError(f"Expected yaml but got a directory: {path}")
 
     with open(path, "r", encoding="utf-8") as f:
         return yaml.safe_load(f) or {}
-
-        
 
 def load_config(config_path: str | Path):
     """
@@ -35,22 +30,20 @@ def load_config(config_path: str | Path):
 
         base = _load_yaml(base_path)
         merged = {**base, **cfg}  # top-level shallow merge
-        
+
         for section in ("io", "train", "model"):
             merged[section] = {**base.get(section, {}), **cfg.get(section, {})}
         return merged
 
     return cfg
 
-
-
 def get_model_name_from_cfg(cfg: str):
     """Return a filesystem-safe model name derived from class_path in config."""
-    
+
     model_cfg = cfg.get("model", {})
     class_path = model_cfg.get("class_path", "unknown_model")
     base = class_path.split(".")[-1]  # e.g. RandomForestClassifier
-    
+
     return clean_model_name(base)
 
 

@@ -34,7 +34,7 @@ def main():
         logger.info(f"Model Found: {model_name}")
     else:
         model_name = "random_forest"
-        logger.info(f"No model specified, using default - Random Forest Classifier")
+        logger.info("No model specified, using default - Random Forest Classifier")
 
     base_url = "http://127.0.0.1:8000"
 
@@ -74,6 +74,7 @@ def main():
         logger.info(f"Result: {result.get('result')}")
     else:
         logger.info("Post Request failed.")
+
 
 if __name__ == "__main__":
     main()
