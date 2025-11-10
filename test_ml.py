@@ -127,3 +127,43 @@ def test_three_model_directory_and_files_exists():
 
     models = list(models_dir.rglob("*.pkl"))
     assert models, "models/ exists but no model artifacts found."
+
+
+def test_no_nulls(load_data):
+    nulls = load_data.isnull().sum().sum()
+    assert nulls == 0, f"Dataset contains {nulls} null values."
+
+
+def test_no_duplicate_rows(load_data):
+    dups = load_data.duplicated().sum()
+    assert dups == 0, f"Duplicate rows detected: {dups}"
+
+
+@pytest.mark.parametrize(
+    "column,low,high",
+    [
+        ("age", 0, 120),
+        ("hours_per_week", 0, 168),
+        ("education-num", 1, 16)
+    ],
+)
+def test_value_ranges_if_present(load_data, column, low, high):
+    if column not in load_data.columns:
+        pytest.skip(f"{column} not present; skipping range check.")
+    series = load_data[column].dropna()
+    assert (series >= low).all() and (series <= high).all(), (
+        f"Values in {column} outside expected range [{low}, {high}]"
+    )
+
+
+def test_column_types(load_data):
+    expected_types = {
+        "age": "int64",
+        "education-num": "int64",
+        "captial-gain": "int64",
+        "captial-loss": "int64",
+        "hours-per-week": "int64",
+        }
+
+    for column, dtype in expected_types.items():
+        assert load_data[column].dtype == dtype, f"{column} should be {dtype}"
