@@ -62,10 +62,21 @@ For additional information see the Model Card paper: https://arxiv.org/pdf/1810.
 ---
 
 **CLI Commands**: In command, you can pass in a --config arguement with the location of the configratuion file. Unless input otherwise, the pipeline will train and predict using the Random Forest Classifier by default. However, if you call the 
->python train_model.py --config configs/gaussian_nb.yaml
+
+```
+python train_model.py --config configs/gaussian_nb.yaml
+```
+
 The pipeline will load the configuration file and using the configuration file, the system will import the correct modules/libraries, load the configuration file prefilled with the basic configuration parameters for the model, and then perform the training. Once the training has been complete, the pipeline will save the model file as a pickel file and store it in the models/model_name sub-directory. The pipeline will also export the encoder, label binarizer, a json file of the metrics obtained from the run, a json file containing all the parameters used, and finally the slice performance training output will be saved into a text file. 
 
-When using the uvicorn, you can select the model to be used via the ...:8000/docs/ sub domain or you can initialate a get/post to /data/?model=model_name, replace model_name with the model desired. The web service will automatically display all available models that have been trained and stored inside the project. 
+When using the uvicorn, you can select the model to be used via the ...:8000/docs/ sub domain interfact or you can initialate a get/post to the application by adding /data/?model={model_name} to the url, replace {model_name} with the model desired. 
+
+```
+http://127.0.0.1:8000/data/?model=kn_neighbors
+
+```
+
+The web service will automatically display all available models that have been trained and stored inside the project. 
 
 ---
 
