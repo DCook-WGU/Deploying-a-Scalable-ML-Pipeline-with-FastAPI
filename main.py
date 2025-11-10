@@ -49,7 +49,7 @@ def discover_models(MODELS_DIR):
             continue
 
         base_filenames = {p.stem.replace("_encoder", "").replace("_model", "")
-                            .replace("_label_binarizer", "") for p in pickles}
+                        .replace("_label_binarizer", "") for p in pickles}
 
         for base_filename in base_filenames:
             encoder_file = model_subdir / f"{base_filename}_encoder.pkl"

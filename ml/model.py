@@ -44,7 +44,7 @@ def _build_estimator(
         module_path, class_name = class_path.rsplit(".", 1)
         module = importlib.import_module(module_path)
         cls = getattr(module, class_name)
-    except(ImportError, AttributeError, ValueError) as e:
+    except (ImportError, AttributeError, ValueError) as e:
         raise ImportError(f"Could not import model: '{class_path}':{e}")
 
     parameters = dict(parameters or {})
@@ -194,7 +194,7 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
     allow_overwrite = bool(io_cfg.get("allow_overwrite", True))
 
     files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path,
-                            metrics_file_path, parameters_file_path]
+                        metrics_file_path, parameters_file_path]
 
     existing_files_list = []
 
@@ -219,8 +219,7 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
         raise FileExistsError(f"Save aborted! File was detected and overwrite protections are enabled: \n"
                               f"- {existing_files_list_str}\n"
                               "Either change overwrite protection in _base.yaml from io.allow_overwrite: \
-                              true or select a different name for save"
-                            )
+                              true or select a different name for save")
 
     with open(model_file_path, "wb") as f:
         pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
