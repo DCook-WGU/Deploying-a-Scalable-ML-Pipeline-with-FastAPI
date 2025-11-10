@@ -194,7 +194,7 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
     allow_overwrite = bool(io_cfg.get("allow_overwrite", True))
 
     files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path,
-                        metrics_file_path, parameters_file_path]
+                          metrics_file_path, parameters_file_path]
 
     existing_files_list = []
 
