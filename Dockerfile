@@ -56,6 +56,11 @@ RUN conda tos accept --override-channels --channel https://repo.anaconda.com/pkg
 #SHELL ["conda", "run", "-n", "${ENV_NAME}", "/bin/bash", "-c"]
 SHELL ["/bin/bash", "-lc"]
 
+# Auto Start Env
+RUN conda init bash
+RUN echo 'source /opt/miniconda/etc/profile.d/conda.sh' >> /etc/bash.bashrc \
+ && echo 'conda activate mlops-dev-project-two' >> /etc/bash.bashrc
+
 # Set working directory for your project
 WORKDIR /app
 
