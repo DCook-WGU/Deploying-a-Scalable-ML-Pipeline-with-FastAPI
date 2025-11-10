@@ -25,7 +25,6 @@ def load_data():
         except Exception:
             dataframe = None
 
-
     if dataframe is not None and not dataframe.empty:
         return dataframe
 

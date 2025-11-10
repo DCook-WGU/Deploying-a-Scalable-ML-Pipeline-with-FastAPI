@@ -23,10 +23,11 @@ def _filter_params_for_cls(cls, params: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def _build_estimator(
-    cfg: Optional[Dict[str, Any]] = None, 
-    class_path: Optional[str] = None, 
-    parameters: Optional[Dict[str, Any]] = None, 
-    default_random_state: int = 42):
+    cfg: Optional[Dict[str, Any]] = None,
+    class_path: Optional[str] = None,
+    parameters: Optional[Dict[str, Any]] = None,
+    default_random_state: int = 42
+    ):
 
     if cfg:
         model_cfg = cfg.get("model", {}) or {}
@@ -70,7 +71,7 @@ def _add_suffixes(cfg):
         "metrics": "metrics.json",
     }
 
-    return {**defaults, **(cfg.get("io", {}).get("file_name_suffixes", {}) )}
+    return {**defaults, **(cfg.get("io", {}).get("file_name_suffixes", {}))}
 
 
 def train_model(X_train, y_train, cfg):
@@ -155,9 +156,9 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
     model
         Trained machine learning model or OneHotEncoder.
     encoder
-        Trained machine learning model's encoder 
+        Trained machine learning model's encoder
     label_binarizer
-        Trained machine learning model's label binarizer 
+        Trained machine learning model's label binarizer
     cfg
         config file
     metrics
@@ -166,10 +167,8 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
         parameters file
     save_dir
         Path to save directory.
-
-    model_name 
+    model_name
         model name
-        
     """
 
     io_cfg = (cfg.get("io") or {})
@@ -192,9 +191,10 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
     metrics_file_path = save_dir / f"{base_filename}{suffix_metrics}"
     parameters_file_path = save_dir / f"{base_filename}{suffix_parameters}"
 
-    allow_overwrite  = bool(io_cfg.get("allow_overwrite", True))
+    allow_overwrite = bool(io_cfg.get("allow_overwrite", True))
 
-    files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path, metrics_file_path, parameters_file_path]
+    files_to_check_for = [model_file_path, encoder_file_path, label_binarizer_file_path, 
+        metrics_file_path, parameters_file_path]
 
     existing_files_list = []
 
@@ -202,24 +202,25 @@ def save_model(model, encoder, label_binarizer, cfg, metrics, parameters, save_d
         if file.exists():
             existing_files_list.append(file)
 
-    if existing_files_list and not allow_overwrite :
+    if existing_files_list and not allow_overwrite:
 
         resolved_existing_files_list = []
-        
+
         for file in existing_files_list:
             absolute_path = file.resolve()
             absolute_path_string = str(absolute_path)
             resolved_existing_files_list.append(absolute_path_string)
 
         existing_files_list_str = "\n - ".join(resolved_existing_files_list)
-        
+
         # One line variant for lines 206-213
-        #existing_files_list_str = "\n  - ".join(str(file.resolve()) for file in existing_files_list)
+        # existing_files_list_str = "\n  - ".join(str(file.resolve()) for file in existing_files_list)
 
         raise FileExistsError(f"Save aborted! File was detected and overwrite protections are enabled: \n"
                               f"- {existing_files_list_str}\n"
-                              "Either change overwrite protection in _base.yaml from io.allow_overwrite: true or select a different name for save"
-        )
+                              "Either change overwrite protection in _base.yaml from io.allow_overwrite: \
+                              true or select a different name for save"
+                            )   
 
     with open(model_file_path, "wb") as f:
         pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)
@@ -254,28 +255,21 @@ def load_model_full(model_name, cfg):
     model_name
 
     cfg
-
     Returns:
     ------
     model
-    
     encoder
-    
     label_binarizer
-
-
     """
 
     io_cfg = cfg.get("io", {})
 
-    #MODELS_DIR = MODELS_DIR
     model_subdir = io_cfg.get("model_subdir")
 
     model_subdir_path = Path(MODELS_DIR) / model_subdir
 
     if not model_subdir_path.is_dir() or not model_subdir_path.exists():
         raise FileNotFoundError(f"Model subdir not found: {model_subdir_path}")
-
 
     model_path = model_subdir_path / f"{model_name}_model.pkl"
     encoder_path = model_subdir_path / f"{model_name}_encoder.pkl"
@@ -285,7 +279,7 @@ def load_model_full(model_name, cfg):
     for path in paths:
         if not path.exists():
             raise FileNotFoundError(f"Missing Component: {path}")
-        
+
     with open(model_path, "rb") as f:
         model = pickle.load(f)
 
@@ -305,14 +299,11 @@ def load_model_full(model_name, cfg):
     logger.info(hasattr(encoder, "categories_"))  # confirms fitted encoder
     logger.info(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
 
-
     return model, encoder, label_binarizer
-
 
 def load_model(path):
     with open(path, "rb") as f:
         return pickle.load(f)
-
 
 def performance_on_categorical_slice(
     data, column_name, slice_value, categorical_features, label, encoder, label_binarizer, model
@@ -355,19 +346,18 @@ def performance_on_categorical_slice(
 
     X_slice, y_slice, _, _ = process_data(
         df_slice,
-        categorical_features = categorical_features,
-        label = label,
-        training = False,
-        encoder = encoder,
-        lb = label_binarizer
+        categorical_features=categorical_features,
+        label=label,
+        training=False,
+        encoder=encoder,
+        lb=label_binarizer
     )
 
-    #preds = None # your code here to get prediction on X_slice using the inference function
+    # preds = None # your code here to get prediction on X_slice using the inference function
     slice_predictions = inference(model, X_slice)
 
-    #precision, recall, fbeta = compute_model_metrics(y_slice, preds)
+    # precision, recall, fbeta = compute_model_metrics(y_slice, preds)
     slice_precision, slice_recall, slice_fbeta = compute_model_metrics(y_slice, slice_predictions)
 
-
-    #return precision, recall, fbeta
-    return slice_precision, slice_recall, slice_fbeta 
+    # return precision, recall, fbeta
+    return slice_precision, slice_recall, slice_fbeta

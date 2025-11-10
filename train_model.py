@@ -1,16 +1,9 @@
-import argparse 
+import argparse
 import os
-from pathlib import Path
-
 import numpy as np
 import pandas as pd
-
 import logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
-from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_score
-
+from sklearn.model_selection import train_test_split, StratifiedKFold
 from ml.data import process_data
 from ml.model import (
     compute_model_metrics,
@@ -20,10 +13,11 @@ from ml.model import (
     save_model,
     train_model,
 )
-
 from ml.config import load_config, get_model_name_from_cfg, parse_cfg
-from ml.paths import APP_ROOT, DATA_DIR, MODELS_DIR
+from ml.paths import DATA_DIR, MODELS_DIR
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def parse_args():
 
@@ -39,7 +33,7 @@ def parse_args():
         help="Path to the YAML configuration file (e.g. configs/random_forest.yaml)",
     )
 
-     # Data Files
+    # Data Files
     parser.add_argument(
         "--data-dir",
         help="Override io.data_dir"
@@ -57,13 +51,16 @@ def parse_args():
 
 
 def apply_cli_overrides(cfg, args):
-    
+
     io_cfg = cfg.setdefault("io", {})
 
     # Data Files
-    if args.data_dir:  io_cfg["data_dir"]  = args.data_dir
-    if args.data_file: io_cfg["data_file"] = args.data_file
-    if args.data_path: io_cfg["data_path"] = args.data_path
+    if args.data_dir: 
+        io_cfg["data_dir"] = args.data_dir
+    if args.data_file: 
+        io_cfg["data_file"] = args.data_file
+    if args.data_path: 
+        io_cfg["data_path"] = args.data_path
 
     return cfg
 
@@ -78,7 +75,7 @@ def load_data(cfg):
     data_file_path = os.path.join(data_path, data_filename)
     logger.info(f"Date File Path: {data_file_path}")
 
-    #data = None # your code here
+    # data = None # your code here
     data = pd.read_csv(data_file_path)
 
     return data
@@ -101,7 +98,7 @@ def resolve_model_path(cfg):
     save_dir.mkdir(parents=True, exist_ok=True)
 
     return save_dir, model_name
-    
+
 
 def main():
 
@@ -149,9 +146,9 @@ def main():
         "native-country",
     ]
 
-    train_df, holdout_df = train_test_split(data, test_size=train_cfg.get("holdout_size"), \
-        stratify=data[train_cfg.get("target")], random_state=train_cfg.get("random_state"))
-
+    train_df, holdout_df = train_test_split(data, test_size=train_cfg.get("holdout_size"), 
+                                            stratify=data[train_cfg.get("target")], 
+                                            random_state=train_cfg.get("random_state"))
 
     def data_split_kfold(data, cfg):
 
@@ -193,7 +190,7 @@ def main():
             fold_metrics.append((precision, recall, fbeta))
 
         fold_metrics = np.array(fold_metrics)
-        
+
         mean_precision, mean_recall, mean_fbeta = np.mean(fold_metrics, axis=0)
 
         logger.info("\n=== Cross-validation Summary ===")
@@ -222,7 +219,7 @@ def main():
 
     logger.info(final_metrics)
 
-    params=model_cfg.get("params")
+    params = model_cfg.get("params")
 
     save_model(
         model=model,
@@ -246,7 +243,6 @@ def main():
     logger.info(hasattr(model, "n_features_in_"))  # confirms it was trained/fitted
     logger.info(hasattr(encoder, "categories_"))  # confirms fitted encoder
     logger.info(hasattr(label_binarizer, "classes_"))  # confirms fitted binarizer
-
 
     # iterate through the categorical features
     for col in cat_features:

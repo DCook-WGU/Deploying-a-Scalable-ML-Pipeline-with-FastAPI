@@ -24,6 +24,7 @@ DOCS_DIR = APP_ROOT / "docs"
 DEFAULT_MODEL_SUBDIR = "random_forest"
 DEFAULT_MODEL_DIR = MODELS_DIR / DEFAULT_MODEL_SUBDIR
 
+
 def ensure_directories() -> None:
     """Create all common directories if missing."""
 
@@ -38,6 +39,7 @@ def ensure_directories() -> None:
 
 # Runs once on import to verify all directories are there and created.
 ensure_directories()
+
 
 # Debug by running directly
 if __name__ == "__main__":
